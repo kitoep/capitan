@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="618" viewBox="0 0 900 618" role="img" aria-label="Los seis agentes de cada actividad">
+<style>
+.ink{fill:#1f2328}.ink2{fill:#59636e}.card{fill:#f6f8fa;stroke:#d0d7de}
+.acc{fill:#1f5c8f}.accs{fill:#e3edf6}.accl{stroke:#1f5c8f}
+.br{fill:#9a6b12}.brs{fill:#f6eedb}.brl{stroke:#9a6b12}
+.ok{fill:#1a7f37}.oks{fill:#dcf3e3}.okl{stroke:#1a7f37}
+.ln{stroke:#8c959f}.lnf{fill:#8c959f}.head{fill:#1f5c8f}.headt{fill:#ffffff}
+@media (prefers-color-scheme: dark){
+.ink{fill:#e6edf3}.ink2{fill:#9198a1}.card{fill:#161b22;stroke:#30363d}
+.acc{fill:#7db3e3}.accs{fill:#1c2c3d}.accl{stroke:#7db3e3}
+.br{fill:#e0b25a}.brs{fill:#2e2717}.brl{stroke:#e0b25a}
+.ok{fill:#3fb950}.oks{fill:#12261a}.okl{stroke:#3fb950}
+.ln{stroke:#6e7681}.lnf{fill:#6e7681}.head{fill:#1c2c3d}.headt{fill:#e6edf3}}
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+</style>
+<defs><marker id="f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="lnf"/></marker></defs>
+<rect x="20" y="10" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="42" y="54" class="ink" font-size="22" font-weight="700" text-anchor="start">Crítico</text>
+<rect x="283" y="33" width="137" height="26" rx="13" class="accs"/>
+<text x="351.5" y="51" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · OPUS</text>
+<text x="42" y="82" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 4 · antes del código</text>
+<line x1="42" y1="102" x2="418" y2="102" class="ln" stroke-width="1" opacity=".5"/>
+<text x="42" y="134" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Revisa el plan sin oír la defensa:</text>
+<text x="42" y="160" class="ink" font-size="17.5" font-weight="400" text-anchor="start">nadie lo convence de que está bien.</text>
+<rect x="460" y="10" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="482" y="54" class="ink" font-size="22" font-weight="700" text-anchor="start">Seguridad del plan</text>
+<rect x="723" y="33" width="137" height="26" rx="13" class="accs"/>
+<text x="791.5" y="51" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · OPUS</text>
+<text x="482" y="82" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 4 · si toca datos o accesos</text>
+<line x1="482" y1="102" x2="858" y2="102" class="ln" stroke-width="1" opacity=".5"/>
+<text x="482" y="134" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Encuentra el riesgo cuando aún es</text>
+<text x="482" y="160" class="ink" font-size="17.5" font-weight="400" text-anchor="start">papel, no cuando ya es código.</text>
+<rect x="20" y="216" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="42" y="260" class="ink" font-size="22" font-weight="700" text-anchor="start">Planeador de pruebas</text>
+<rect x="283" y="239" width="137" height="26" rx="13" class="accs"/>
+<text x="351.5" y="257" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · OPUS</text>
+<text x="42" y="288" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 5 · antes del código</text>
+<line x1="42" y1="308" x2="418" y2="308" class="ln" stroke-width="1" opacity=".5"/>
+<text x="42" y="340" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Solo conoce lo que se pidió: sus</text>
+<text x="42" y="366" class="ink" font-size="17.5" font-weight="400" text-anchor="start">pruebas no heredan los huecos.</text>
+<rect x="460" y="216" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="482" y="260" class="ink" font-size="22" font-weight="700" text-anchor="start">Ajuste de pruebas</text>
+<rect x="723" y="239" width="137" height="26" rx="13" class="accs"/>
+<text x="791.5" y="257" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · OPUS</text>
+<text x="482" y="288" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 9 · si hubo desvíos</text>
+<line x1="482" y1="308" x2="858" y2="308" class="ln" stroke-width="1" opacity=".5"/>
+<text x="482" y="340" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Sabe qué cambió del plan, no cómo:</text>
+<text x="482" y="366" class="ink" font-size="17.5" font-weight="400" text-anchor="start">sigue midiendo lo que se pidió.</text>
+<rect x="20" y="422" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="42" y="466" class="ink" font-size="22" font-weight="700" text-anchor="start">Probador</text>
+<rect x="265" y="445" width="155" height="26" rx="13" class="accs"/>
+<text x="342.5" y="463" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · SONNET</text>
+<text x="42" y="494" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 10 · tests y recorridos E2E</text>
+<line x1="42" y1="514" x2="418" y2="514" class="ln" stroke-width="1" opacity=".5"/>
+<text x="42" y="546" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Cada prueba se ve roja sin el cambio</text>
+<text x="42" y="572" class="ink" font-size="17.5" font-weight="400" text-anchor="start">y verde con él; si no, no cuenta.</text>
+<rect x="460" y="422" width="420" height="186" rx="14" class="card" stroke-width="1.5"/>
+<text x="482" y="466" class="ink" font-size="22" font-weight="700" text-anchor="start">Seguridad del diff</text>
+<rect x="723" y="445" width="137" height="26" rx="13" class="accs"/>
+<text x="791.5" y="463" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">AGENTE · OPUS</text>
+<text x="482" y="494" class="ink2" font-size="16" font-weight="400" text-anchor="start">Paso 11 · en toda actividad</text>
+<line x1="482" y1="514" x2="858" y2="514" class="ln" stroke-width="1" opacity=".5"/>
+<text x="482" y="546" class="ink" font-size="17.5" font-weight="400" text-anchor="start">Lee solo el cambio, línea por línea,</text>
+<text x="482" y="572" class="ink" font-size="17.5" font-weight="400" text-anchor="start">sin la historia de cómo se hizo.</text>
+</svg>
