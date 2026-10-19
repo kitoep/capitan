@@ -1,0 +1,16 @@
+{
+  "name": "capitan",
+  "owner": {
+    "name": "kitoep"
+  },
+  "metadata": {
+    "description": "Marketplace con el método Capitán."
+  },
+  "plugins": [
+    {
+      "name": "capitan",
+      "source": "./",
+      "description": "Método para que Claude avance un proyecto solo, con puertas, pruebas y trazabilidad."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Capitán — Claude avanza tu proyecto solo, con las revisiones de un buen equipo">
+  <style>
+    .bg{fill:#f5f6f8}.ink{fill:#18212f}.ink2{fill:#4b5566}.acc{fill:#1f5c8f}.brass{fill:#a5761c}
+    .line{stroke:#1f5c8f}.dot{fill:#ffffff;stroke:#1f5c8f}.gold{fill:#a5761c}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#11161e}.ink{fill:#e6e9ee}.ink2{fill:#a7b0bd}.acc{fill:#7db3e3}.brass{fill:#e0b25a}
+      .line{stroke:#7db3e3}.dot{fill:#19202b;stroke:#7db3e3}.gold{fill:#e0b25a}
+    }
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+  </style>
+  <rect class="bg" width="1200" height="300" rx="16"/>
+  <text class="brass" x="64" y="84" font-size="16" font-weight="600" letter-spacing="3">PLUGIN DE CLAUDE CODE</text>
+  <text class="ink" x="60" y="160" font-size="76" font-weight="800">Capitán</text>
+  <text class="ink2" x="64" y="208" font-size="24">Claude avanza tu proyecto solo, una actividad tras otra,</text>
+  <text class="ink2" x="64" y="242" font-size="24">con las revisiones de un buen equipo y todo escrito en el repo.</text>
+  <g transform="translate(800,150)">
+    <line class="line" x1="0" y1="0" x2="330" y2="0" stroke-width="3"/>
+    <circle class="dot" cx="0" cy="0" r="12" stroke-width="3"/>
+    <circle class="gold" cx="66" cy="0" r="12"/>
+    <circle class="dot" cx="132" cy="0" r="12" stroke-width="3"/>
+    <circle class="gold" cx="198" cy="0" r="12"/>
+    <circle class="dot" cx="264" cy="0" r="12" stroke-width="3"/>
+    <circle class="gold" cx="330" cy="0" r="12"/>
+    <text class="ink2" x="0" y="44" font-size="15" text-anchor="middle">plan</text>
+    <text class="ink2" x="132" y="44" font-size="15" text-anchor="middle">pruebas</text>
+    <text class="ink2" x="264" y="44" font-size="15" text-anchor="middle">merge</text>
+    <text class="brass" x="198" y="-30" font-size="14" text-anchor="middle">● candados</text>
+  </g>
+</svg>

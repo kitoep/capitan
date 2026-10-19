@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="702" viewBox="0 0 900 702" role="img" aria-label="Una sesión de /capitan:trabajar">
+<style>
+.ink{fill:#1f2328}.ink2{fill:#59636e}.card{fill:#f6f8fa;stroke:#d0d7de}
+.acc{fill:#1f5c8f}.accs{fill:#e3edf6}.accl{stroke:#1f5c8f}
+.br{fill:#9a6b12}.brs{fill:#f6eedb}.brl{stroke:#9a6b12}
+.ok{fill:#1a7f37}.oks{fill:#dcf3e3}.okl{stroke:#1a7f37}
+.ln{stroke:#8c959f}.lnf{fill:#8c959f}.head{fill:#1f5c8f}.headt{fill:#ffffff}
+@media (prefers-color-scheme: dark){
+.ink{fill:#e6edf3}.ink2{fill:#9198a1}.card{fill:#161b22;stroke:#30363d}
+.acc{fill:#7db3e3}.accs{fill:#1c2c3d}.accl{stroke:#7db3e3}
+.br{fill:#e0b25a}.brs{fill:#2e2717}.brl{stroke:#e0b25a}
+.ok{fill:#3fb950}.oks{fill:#12261a}.okl{stroke:#3fb950}
+.ln{stroke:#6e7681}.lnf{fill:#6e7681}.head{fill:#1c2c3d}.headt{fill:#e6edf3}}
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+</style>
+<defs><marker id="f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="lnf"/></marker></defs>
+<rect x="20" y="10" width="860" height="104" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="46" r="17" class="acc"/>
+<text x="54" y="52.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">1</text>
+<text x="82" y="53" class="ink" font-size="20" font-weight="700" text-anchor="start">Arranca</text>
+<rect x="695" y="31" width="163" height="26" rx="13" class="brs"/>
+<text x="776.5" y="49" class="br" font-size="13.5" font-weight="700" text-anchor="middle">CANDADO · RELEVO</text>
+<text x="42" y="92" class="ink2" font-size="17" font-weight="400" text-anchor="start">Recibe el relevo y las decisiones, y lee lo que contestaste en el reporte anterior.</text>
+<line x1="450.0" y1="118" x2="450.0" y2="146" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="10" y="150" width="880" height="300" rx="18" fill="none" class="accl" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="30" y="182" class="acc" font-size="14" font-weight="700" text-anchor="start">UNA ACTIVIDAD TRAS OTRA</text>
+<rect x="20" y="200" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="236" r="17" class="acc"/>
+<text x="54" y="242.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">2</text>
+<text x="82" y="243" class="ink" font-size="20" font-weight="700" text-anchor="start">Elige</text>
+<text x="42" y="282" class="ink2" font-size="17" font-weight="400" text-anchor="start">La primera sin bloqueo</text>
+<text x="42" y="307" class="ink2" font-size="17" font-weight="400" text-anchor="start">que quepa con su</text>
+<text x="42" y="332" class="ink2" font-size="17" font-weight="400" text-anchor="start">velocidad real</text>
+<line x1="291" y1="288.0" x2="312" y2="288.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="317" y="200" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="351" cy="236" r="17" class="acc"/>
+<text x="351" y="242.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">3</text>
+<text x="379" y="243" class="ink" font-size="20" font-weight="700" text-anchor="start">La atiende</text>
+<text x="339" y="282" class="ink2" font-size="17" font-weight="400" text-anchor="start">Plan, agentes y pruebas</text>
+<text x="339" y="307" class="ink2" font-size="17" font-weight="400" text-anchor="start">en 16 pasos con puertas</text>
+<rect x="339" y="336" width="103" height="26" rx="13" class="accs"/>
+<text x="390.5" y="354" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">6 AGENTES</text>
+<line x1="588" y1="288.0" x2="609" y2="288.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="614" y="200" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="648" cy="236" r="17" class="acc"/>
+<text x="648" y="242.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">4</text>
+<text x="676" y="243" class="ink" font-size="20" font-weight="700" text-anchor="start">Cierra</text>
+<text x="636" y="282" class="ink2" font-size="17" font-weight="400" text-anchor="start">Merge a la rama de</text>
+<text x="636" y="307" class="ink2" font-size="17" font-weight="400" text-anchor="start">sesión; estado.md al día</text>
+<rect x="636" y="336" width="146" height="26" rx="13" class="brs"/>
+<text x="709.0" y="354" class="br" font-size="13.5" font-weight="700" text-anchor="middle">CANDADO · JUEZ</text>
+<path d="M747.0 379 V410 H153.0 V384" fill="none" class="accl" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="245.0" y="394" width="410" height="32" rx="16" class="accs"/>
+<text x="450.0" y="416" class="acc" font-size="16" font-weight="700" text-anchor="middle">¿Queda trabajo, uso y tiempo? → la siguiente</text>
+<line x1="450.0" y1="454" x2="450.0" y2="510" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<text x="466.0" y="488" class="ink2" font-size="15.5" font-weight="400" text-anchor="start">Se acabó el trabajo, el uso (85 %) o tu presupuesto</text>
+<rect x="20" y="516" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="552" r="17" class="acc"/>
+<text x="54" y="558.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">5</text>
+<text x="82" y="559" class="ink" font-size="20" font-weight="700" text-anchor="start">Reporte</text>
+<text x="42" y="598" class="ink2" font-size="17" font-weight="400" text-anchor="start">.md en el repo y una</text>
+<text x="42" y="623" class="ink2" font-size="17" font-weight="400" text-anchor="start">página que contestas</text>
+<line x1="291" y1="604.0" x2="312" y2="604.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="317" y="516" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="351" cy="552" r="17" class="acc"/>
+<text x="351" y="558.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">6</text>
+<text x="379" y="559" class="ink" font-size="20" font-weight="700" text-anchor="start">Un solo PR</text>
+<text x="339" y="598" class="ink2" font-size="17" font-weight="400" text-anchor="start">Todas las actividades,</text>
+<text x="339" y="623" class="ink2" font-size="17" font-weight="400" text-anchor="start">con el CI local en verde</text>
+<rect x="339" y="652" width="146" height="26" rx="13" class="brs"/>
+<text x="412.0" y="670" class="br" font-size="13.5" font-weight="700" text-anchor="middle">CANDADO · PUSH</text>
+<line x1="588" y1="604.0" x2="609" y2="604.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="614" y="516" width="266" height="176" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="648" cy="552" r="17" class="ok"/>
+<text x="648" y="558.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">7</text>
+<text x="676" y="559" class="ink" font-size="20" font-weight="700" text-anchor="start">Tú decides</text>
+<text x="636" y="598" class="ink2" font-size="17" font-weight="400" text-anchor="start">Recorres, contestas</text>
+<text x="636" y="623" class="ink2" font-size="17" font-weight="400" text-anchor="start">y haces el merge</text>
+<rect x="636" y="652" width="43" height="26" rx="13" class="oks"/>
+<text x="657.5" y="670" class="ok" font-size="13.5" font-weight="700" text-anchor="middle">TÚ</text>
+</svg>

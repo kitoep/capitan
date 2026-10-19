@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="868" viewBox="0 0 900 868" role="img" aria-label="Los 16 pasos de una actividad, en cuatro tramos">
+<style>
+.ink{fill:#1f2328}.ink2{fill:#59636e}.card{fill:#f6f8fa;stroke:#d0d7de}
+.acc{fill:#1f5c8f}.accs{fill:#e3edf6}.accl{stroke:#1f5c8f}
+.br{fill:#9a6b12}.brs{fill:#f6eedb}.brl{stroke:#9a6b12}
+.ok{fill:#1a7f37}.oks{fill:#dcf3e3}.okl{stroke:#1a7f37}
+.ln{stroke:#8c959f}.lnf{fill:#8c959f}.head{fill:#1f5c8f}.headt{fill:#ffffff}
+@media (prefers-color-scheme: dark){
+.ink{fill:#e6edf3}.ink2{fill:#9198a1}.card{fill:#161b22;stroke:#30363d}
+.acc{fill:#7db3e3}.accs{fill:#1c2c3d}.accl{stroke:#7db3e3}
+.br{fill:#e0b25a}.brs{fill:#2e2717}.brl{stroke:#e0b25a}
+.ok{fill:#3fb950}.oks{fill:#12261a}.okl{stroke:#3fb950}
+.ln{stroke:#6e7681}.lnf{fill:#6e7681}.head{fill:#1c2c3d}.headt{fill:#e6edf3}}
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+</style>
+<defs><marker id="f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="lnf"/></marker></defs>
+<rect x="20" y="10" width="415" height="54" rx="14" class="head"/>
+<text x="42" y="45" class="headt" font-size="21" font-weight="700" text-anchor="start">1 · Planear</text>
+<line x1="439" y1="37.0" x2="461" y2="37.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="76" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="110" class="acc" font-size="16" font-weight="700" text-anchor="start">1-2</text>
+<text x="82" y="110" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Rama propia y En curso</text>
+<rect x="20" y="138" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="172" class="acc" font-size="16" font-weight="700" text-anchor="start">3</text>
+<text x="82" y="172" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Plan completo por escrito</text>
+<rect x="20" y="200" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="234" class="acc" font-size="16" font-weight="700" text-anchor="start">4</text>
+<text x="82" y="234" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Crítica del plan</text>
+<rect x="361" y="214" width="60" height="26" rx="13" class="accs"/>
+<text x="391.0" y="232" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">OPUS</text>
+<rect x="20" y="262" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="296" class="acc" font-size="16" font-weight="700" text-anchor="start">4</text>
+<text x="82" y="296" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Seguridad del plan</text>
+<rect x="361" y="276" width="60" height="26" rx="13" class="accs"/>
+<text x="391.0" y="294" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">OPUS</text>
+<rect x="20" y="324" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="358" class="acc" font-size="16" font-weight="700" text-anchor="start">5</text>
+<text x="82" y="358" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Plan de pruebas</text>
+<rect x="361" y="338" width="60" height="26" rx="13" class="accs"/>
+<text x="391.0" y="356" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">OPUS</text>
+<rect x="20" y="390" width="415" height="58" rx="14" class="brs"/>
+<rect x="20" y="390" width="6" height="58" rx="3" class="br"/>
+<text x="42" y="414" class="br" font-size="13" font-weight="700" text-anchor="start">PUERTA</text>
+<text x="42" y="436" class="ink" font-size="17" font-weight="600" text-anchor="start">Sin plan criticado no hay código</text>
+<rect x="465" y="10" width="415" height="54" rx="14" class="head"/>
+<text x="487" y="45" class="headt" font-size="21" font-weight="700" text-anchor="start">2 · Construir</text>
+<rect x="465" y="76" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="110" class="acc" font-size="16" font-weight="700" text-anchor="start">6</text>
+<text x="527" y="110" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Si es bug: un test que falla hoy</text>
+<rect x="465" y="138" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="172" class="acc" font-size="16" font-weight="700" text-anchor="start">7</text>
+<text x="527" y="172" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Implementar + lista de desvíos</text>
+<rect x="465" y="200" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="234" class="acc" font-size="16" font-weight="700" text-anchor="start">8</text>
+<text x="527" y="234" class="ink" font-size="17.5" font-weight="600" text-anchor="start">UI medida en el navegador</text>
+<rect x="465" y="390" width="415" height="58" rx="14" class="brs"/>
+<rect x="465" y="390" width="6" height="58" rx="3" class="br"/>
+<text x="487" y="414" class="br" font-size="13" font-weight="700" text-anchor="start">PUERTA</text>
+<text x="487" y="436" class="ink" font-size="17" font-weight="600" text-anchor="start">Las reglas del repo, intactas</text>
+<path d="M672.5 451 V465 H227.5 V478" fill="none" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="482" width="415" height="54" rx="14" class="head"/>
+<text x="42" y="517" class="headt" font-size="21" font-weight="700" text-anchor="start">3 · Verificar</text>
+<line x1="439" y1="509.0" x2="461" y2="509.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="548" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="582" class="acc" font-size="16" font-weight="700" text-anchor="start">9</text>
+<text x="82" y="582" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Ajuste de las pruebas</text>
+<rect x="361" y="562" width="60" height="26" rx="13" class="accs"/>
+<text x="391.0" y="580" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">OPUS</text>
+<rect x="20" y="610" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="644" class="acc" font-size="16" font-weight="700" text-anchor="start">10</text>
+<text x="82" y="644" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Pruebas y recorridos E2E</text>
+<rect x="344" y="624" width="77" height="26" rx="13" class="accs"/>
+<text x="382.5" y="642" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">SONNET</text>
+<rect x="20" y="672" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="706" class="acc" font-size="16" font-weight="700" text-anchor="start">11</text>
+<text x="82" y="706" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Seguridad del diff</text>
+<rect x="361" y="686" width="60" height="26" rx="13" class="accs"/>
+<text x="391.0" y="704" class="acc" font-size="13.5" font-weight="700" text-anchor="middle">OPUS</text>
+<rect x="20" y="734" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="40" y="768" class="acc" font-size="16" font-weight="700" text-anchor="start">12</text>
+<text x="82" y="768" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Verificador: CI local</text>
+<rect x="20" y="800" width="415" height="58" rx="14" class="brs"/>
+<rect x="20" y="800" width="6" height="58" rx="3" class="br"/>
+<text x="42" y="824" class="br" font-size="13" font-weight="700" text-anchor="start">PUERTA</text>
+<text x="42" y="846" class="ink" font-size="17" font-weight="600" text-anchor="start">Rojo sin el cambio, verde con él</text>
+<rect x="465" y="482" width="415" height="54" rx="14" class="head"/>
+<text x="487" y="517" class="headt" font-size="21" font-weight="700" text-anchor="start">4 · Entregar</text>
+<rect x="465" y="548" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="582" class="acc" font-size="16" font-weight="700" text-anchor="start">13</text>
+<text x="527" y="582" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Merge a la rama de sesión</text>
+<rect x="806" y="562" width="60" height="26" rx="13" class="brs"/>
+<text x="836.0" y="580" class="br" font-size="13.5" font-weight="700" text-anchor="middle">JUEZ</text>
+<rect x="465" y="610" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="644" class="acc" font-size="16" font-weight="700" text-anchor="start">14</text>
+<text x="527" y="644" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Comentario en la tarjeta</text>
+<rect x="465" y="672" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="706" class="acc" font-size="16" font-weight="700" text-anchor="start">15</text>
+<text x="527" y="706" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Hallazgos con su solución</text>
+<rect x="465" y="734" width="415" height="54" rx="14" class="card" stroke-width="1.5"/>
+<text x="485" y="768" class="acc" font-size="16" font-weight="700" text-anchor="start">16</text>
+<text x="527" y="768" class="ink" font-size="17.5" font-weight="600" text-anchor="start">Relevo en estado.md</text>
+<rect x="465" y="800" width="415" height="58" rx="14" class="brs"/>
+<rect x="465" y="800" width="6" height="58" rx="3" class="br"/>
+<text x="487" y="824" class="br" font-size="13" font-weight="700" text-anchor="start">PUERTA</text>
+<text x="487" y="846" class="ink" font-size="17" font-weight="600" text-anchor="start">Relevo al día antes de la siguiente</text>
+</svg>

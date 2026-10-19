@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="658" viewBox="0 0 900 658" role="img" aria-label="Los 8 pasos de /capitan:configurar">
+<style>
+.ink{fill:#1f2328}.ink2{fill:#59636e}.card{fill:#f6f8fa;stroke:#d0d7de}
+.acc{fill:#1f5c8f}.accs{fill:#e3edf6}.accl{stroke:#1f5c8f}
+.br{fill:#9a6b12}.brs{fill:#f6eedb}.brl{stroke:#9a6b12}
+.ok{fill:#1a7f37}.oks{fill:#dcf3e3}.okl{stroke:#1a7f37}
+.ln{stroke:#8c959f}.lnf{fill:#8c959f}.head{fill:#1f5c8f}.headt{fill:#ffffff}
+@media (prefers-color-scheme: dark){
+.ink{fill:#e6edf3}.ink2{fill:#9198a1}.card{fill:#161b22;stroke:#30363d}
+.acc{fill:#7db3e3}.accs{fill:#1c2c3d}.accl{stroke:#7db3e3}
+.br{fill:#e0b25a}.brs{fill:#2e2717}.brl{stroke:#e0b25a}
+.ok{fill:#3fb950}.oks{fill:#12261a}.okl{stroke:#3fb950}
+.ln{stroke:#6e7681}.lnf{fill:#6e7681}.head{fill:#1c2c3d}.headt{fill:#e6edf3}}
+text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+</style>
+<defs><marker id="f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="lnf"/></marker></defs>
+<rect x="20" y="10" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="46" r="17" class="acc"/>
+<text x="54" y="52.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">0</text>
+<text x="82" y="53" class="ink" font-size="20" font-weight="700" text-anchor="start">¿Ya hay configuración?</text>
+<text x="42" y="92" class="ink2" font-size="17" font-weight="400" text-anchor="start">Revisarla, rehacerla o migrar</text>
+<text x="42" y="117" class="ink2" font-size="17" font-weight="400" text-anchor="start">la de la versión anterior</text>
+<line x1="436" y1="80.0" x2="464" y2="80.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="470" y="10" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="504" cy="46" r="17" class="acc"/>
+<text x="504" y="52.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">1</text>
+<text x="532" y="53" class="ink" font-size="20" font-weight="700" text-anchor="start">Herramientas</text>
+<text x="492" y="92" class="ink2" font-size="17" font-weight="400" text-anchor="start">Skills, GitHub, git limpio, Python,</text>
+<text x="492" y="117" class="ink2" font-size="17" font-weight="400" text-anchor="start">medidor de uso y hooks</text>
+<path d="M675.0 153 V163.0 H225.0 V171" fill="none" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="176" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="212" r="17" class="acc"/>
+<text x="54" y="218.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">2</text>
+<text x="82" y="219" class="ink" font-size="20" font-weight="700" text-anchor="start">El tracker</text>
+<text x="42" y="258" class="ink2" font-size="17" font-weight="400" text-anchor="start">Uno externo conectado por MCP</text>
+<text x="42" y="283" class="ink2" font-size="17" font-weight="400" text-anchor="start">o el tablero local en el repo</text>
+<line x1="436" y1="246.0" x2="464" y2="246.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="470" y="176" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="504" cy="212" r="17" class="acc"/>
+<text x="504" y="218.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">3</text>
+<text x="532" y="219" class="ink" font-size="20" font-weight="700" text-anchor="start">El plan</text>
+<text x="492" y="258" class="ink2" font-size="17" font-weight="400" text-anchor="start">Épicas con alcance y orden;</text>
+<text x="492" y="283" class="ink2" font-size="17" font-weight="400" text-anchor="start">si no hay, no lo improvisa</text>
+<path d="M675.0 319 V329.0 H225.0 V337" fill="none" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="342" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="378" r="17" class="acc"/>
+<text x="54" y="384.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">4</text>
+<text x="82" y="385" class="ink" font-size="20" font-weight="700" text-anchor="start">Lo que el plan necesita</text>
+<text x="42" y="424" class="ink2" font-size="17" font-weight="400" text-anchor="start">Dueño, CI local, ambientes, reglas:</text>
+<text x="42" y="449" class="ink2" font-size="17" font-weight="400" text-anchor="start">lo busca y te lo confirma</text>
+<line x1="436" y1="412.0" x2="464" y2="412.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="470" y="342" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="504" cy="378" r="17" class="acc"/>
+<text x="504" y="384.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">5</text>
+<text x="532" y="385" class="ink" font-size="20" font-weight="700" text-anchor="start">Escribe la configuración</text>
+<text x="492" y="424" class="ink2" font-size="17" font-weight="400" text-anchor="start">capitan.md y docs/capitan/;</text>
+<text x="492" y="449" class="ink2" font-size="17" font-weight="400" text-anchor="start">te lo enseña antes de escribir</text>
+<path d="M675.0 485 V495.0 H225.0 V503" fill="none" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="20" y="508" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="54" cy="544" r="17" class="acc"/>
+<text x="54" y="550.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">6</text>
+<text x="82" y="551" class="ink" font-size="20" font-weight="700" text-anchor="start">Concilia plan y tracker</text>
+<text x="42" y="590" class="ink2" font-size="17" font-weight="400" text-anchor="start">Propone cambios; nada se</text>
+<text x="42" y="615" class="ink2" font-size="17" font-weight="400" text-anchor="start">escribe sin tu OK</text>
+<line x1="436" y1="578.0" x2="464" y2="578.0" class="ln" stroke-width="2.2" marker-end="url(#f)"/>
+<rect x="470" y="508" width="410" height="140" rx="14" class="card" stroke-width="1.5"/>
+<circle cx="504" cy="544" r="17" class="acc"/>
+<text x="504" y="550.5" class="headt" font-size="17" font-weight="700" text-anchor="middle">7</text>
+<text x="532" y="551" class="ink" font-size="20" font-weight="700" text-anchor="start">Cierre</text>
+<text x="492" y="590" class="ink2" font-size="17" font-weight="400" text-anchor="start">¿Listo? Sí o no, qué falta</text>
+<text x="492" y="615" class="ink2" font-size="17" font-weight="400" text-anchor="start">y quién lo resuelve</text>
+</svg>

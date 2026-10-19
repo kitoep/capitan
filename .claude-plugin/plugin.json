@@ -1,0 +1,21 @@
+{
+  "name": "capitan",
+  "displayName": "Capitán",
+  "version": "0.7.3",
+  "description": "Avanza un proyecto solo, actividad por actividad, con puertas de calidad, agentes que critican y prueban, candados mecánicos (hooks) y todo documentado en el repo — con un tracker conectado por MCP o con un tablero local.",
+  "author": {
+    "name": "kitoep"
+  },
+  "repository": "https://github.com/kitoep/capitan",
+  "license": "MIT",
+  "keywords": [
+    "metodologia",
+    "harness",
+    "agentes",
+    "tracker",
+    "calidad"
+  ],
+  "dependencies": [
+    "senior-engineer-es@sensei"
+  ]
+}
