@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.7.3-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.7.4-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
@@ -45,7 +45,7 @@ Se usa con **dos comandos**:
 | | |
 |---|---|
 | **Tracker** | La herramienta donde viven las tareas del proyecto, como Jira, Linear, Trello o GitHub Projects. Si el proyecto no tiene una, Capitán usa su propio **tablero local**, dentro del repo. |
-| **MCP** | La forma en que Claude se conecta a otras herramientas, como tu tracker. Con un tracker conectado por MCP, Capitán lee y mueve las tarjetas ahí mismo. Necesita que el conector permita ver, crear, mover y comentar actividades; hasta hoy se ha usado con un solo tracker de ese tipo y con el tablero local. |
+| **MCP** | La forma en que Claude se conecta a otras herramientas, como tu tracker. Al configurar, Capitán busca los conectores que tienes, arma con el tuyo una tabla de qué herramienta hace cada cosa (ver, crear, mover, comentar) y la guarda. Hasta hoy se ha probado con un solo tracker de ese tipo y con el tablero local. |
 | **Actividad** | Una tarjeta del tracker: una tarea con sus criterios de aceptación. Capitán atiende una a la vez, cada una en su propia rama. |
 | **Skill** | Una guía de trabajo escrita que Claude sigue. Funciona mientras Claude se acuerde de seguirla. |
 | **Candado (hook)** | Un programa pequeño que Claude Code corre solo, en momentos fijos, y que puede detener una acción. No depende de la memoria de nadie. |
@@ -69,7 +69,7 @@ nada**: lo que encuentra solo te lo confirma, y lo que no sabes queda como
 |---|---|
 | **0 · ¿Ya hay configuración?** | Si el repo ya tiene `.claude/capitan.md`, te enseña un resumen y pregunta si la **revisa** o la **rehace**. Si viene de la versión anterior del método, ofrece **migrarla**. |
 | **1 · Herramientas** | Comprueba de verdad (no supone) las skills de `senior-engineer-es`, GitHub (`gh auth status`), que git esté limpio, Python 3, el medidor de uso y que los hooks no estén duplicados. Te da una tabla ✅/❌. Si falta algo que bloquea, se detiene ahí. |
-| **2 · ¿Con qué tracker?** | **Si tu tracker está conectado por MCP**: busca el proyecto, te sugiere candidatos y guarda su clave. **Tablero local**: lo crea dentro del repo y te pregunta el prefijo de las ramas. |
+| **2 · ¿Con qué tracker?** | **Busca los conectores MCP que tienes** y te ofrece los que parecen de seguimiento, o escribes tú el tuyo. Con el que elijas arma la **tabla de equivalencias** (qué herramienta ve, crea, mueve, comenta y bloquea), la prueba solo leyendo, te la enseña, busca el proyecto y guarda su clave. Si no tienes ninguno, o prefieres no usarlo, crea el **tablero local** dentro del repo y te pregunta el prefijo de las ramas. |
 | **3 · ¿Dónde está el plan?** | Busca `PLAN.md`, `ROADMAP.md`, `docs/plan*`… Cuenta como plan: épicas con alcance y orden. Si no hay, **no lo improvisa**: te manda a aterrizar la idea o a planear primero. |
 | **4 · Lo que el plan necesita saber** | Lo busca en el repo y te lo confirma en bloque: quién es el **dueño** y cómo se le avisa, el registro de defectos, las reglas del repo, el **CI local en un comando**, la rama principal, el ambiente de verificación, cómo se levanta y apaga el entorno local, el **canal de prueba** permitido (tu teléfono o correo, o «no hay envíos»), el alcance vigente y las **reglas que no se negocian**. |
 | **5 · Escribir la configuración** | **Te lo enseña antes de escribirlo.** Crea `.claude/capitan.md` y `docs/capitan/` con el relevo, las decisiones y los aprendizajes. No hace commit: eso lo decides tú. |

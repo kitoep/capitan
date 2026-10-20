@@ -72,7 +72,8 @@ Todo lo específico vive en **`.claude/capitan.md`**. Léelo primero. Si no
 existe, **detente** y pide correr **`/capitan:configurar`**.
 
 Trae: el **tracker** (`local`, o el tracker externo por MCP con la clave del
-proyecto: cualquier valor que no sea `local` es un tracker MCP), el
+proyecto y su tabla de equivalencias en `## Tracker`: cualquier valor que no sea
+`local` es un tracker MCP), el
 nombre del **dueño** y cómo se le avisa, el plan general, el registro de
 defectos, las reglas del repo, el CI-equivalente local, el ambiente de
 verificación (o «no hay»), el entorno local (cómo se levanta y se apaga), el
@@ -86,7 +87,16 @@ este skill** (ahí están `scripts/` y `plantillas/`).
 
 ## El tracker: una interfaz, dos motores
 
-| Operación | Tracker MCP | `local` |
+Con tracker MCP, **la herramienta de cada operación la dice la sección
+`## Tracker` de `.claude/capitan.md`** (la armó `/capitan:configurar` con las
+herramientas de ese conector). Úsala tal cual; si una operación dice «no
+tiene», usa el sustituto que trae. Si la config no trae esa sección (configs
+anteriores a la 0.7.4), usa los nombres de la columna «Por omisión» y, si el
+conector no los tiene, **detente** y pide correr el Paso 2 de
+`/capitan:configurar`: no adivines herramientas que escriben en el tracker del
+dueño.
+
+| Operación | Tracker MCP · por omisión | `local` |
 |---|---|---|
 | Ver el tablero | `listar-actividades` | `python3 {CAPITAN}/scripts/tablero.py listar --abiertas` |
 | Ver una actividad | `ver-actividad` | `tablero.py ver ACT-0xx` |

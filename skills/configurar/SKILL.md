@@ -64,15 +64,89 @@ Si falta, ofrécelo y **pide permiso antes de tocar su configuración**:
 
 ## Paso 2 — ¿Con qué tracker?
 
-Pregunta con `AskUserQuestion`:
+El tracker es la herramienta donde viven las tareas (Jira, Linear, GitHub
+Projects, Trello…). Capitán lo usa por **MCP**, con las herramientas que ese
+conector traiga; si no hay ninguno, usa el **tablero local**. No supongas
+nombres de herramientas: se descubren y se confirman aquí.
 
-- **Tracker externo (MCP)** — si hay un conector de tracker que responda
-  (p. ej. `contexto-actual`). Busca el proyecto (`listar-proyectos` con el
-  nombre del repo, el del README y `solo_mios`), sugiere los candidatos (clave ·
-  nombre · owner · avance) con el más probable primero, y confirma con
-  `ver-proyecto`. Se guarda la **clave** (`ABC-001`), no el nombre. Si no
-  existe, crearlo es decisión del dueño.
-- **Tablero local** — para proyectos sin tracker. Se crea con
+**1. Busca los conectores MCP que ya tienes.** Revisa las herramientas
+disponibles en esta sesión cuyo nombre empieza con `mcp__` (las diferidas
+también cuentan: búscalas con ToolSearch) y, si hace falta, `claude mcp list`.
+Quédate con los servidores que **parecen de seguimiento del trabajo del
+proyecto**: los que traen herramientas para listar, crear y mover tareas,
+issues, historias o tarjetas **de desarrollo** (no de ventas, clientes, CRM ni
+seguimiento comercial, aunque también hablen de «tareas»). Decide por sus
+herramientas, no por el nombre. Si un servidor **pide autenticarse** y no
+muestra sus herramientas, solo cuenta si su nombre es claramente de un tracker
+(jira, linear, github, trello, asana, clickup…): se ofrece marcado «sin
+autenticar» y, si lo eligen, se le pide al dueño autenticarlo y se repite este
+paso. Para ordenar los candidatos, el más probable es el que cubre más
+operaciones de la tabla de abajo.
+
+**2. Pregunta con `AskUserQuestion`:** *«¿En qué sistema se siguen las tareas
+de este proyecto?»*. Opciones, en este orden:
+
+- **Cada servidor candidato** (hasta tres, el más probable primero), con la
+  descripción de qué herramientas de seguimiento le encontraste.
+- **Tablero local** — siempre, como última opción.
+- La opción **«Otro»** de la herramienta deja que el dueño **escriba** su
+  sistema a mano.
+
+Si no encontraste ningún candidato, dilo en la pregunta y ofrece igual el
+tablero local y la opción de escribirlo.
+
+**3. Según lo que conteste:**
+
+- **Un servidor MCP** → arma la **tabla de equivalencias**: qué herramienta de
+  ese servidor hace cada operación de `/capitan:trabajar`.
+
+  | Operación | Qué debe hacer |
+  |---|---|
+  | Ver el tablero | Listar las actividades abiertas del proyecto |
+  | Ver una actividad | Traer una con su descripción, criterios, subtareas y estado |
+  | Crear | Crear una actividad con título, descripción y, si se puede, subtareas, dependencias y fechas |
+  | Mover | Cambiarla de columna o de estado |
+  | Subtareas | Marcar una subtarea (o casilla de la lista) como hecha |
+  | Comentar | Dejar un comentario en la actividad |
+  | Bloquear | Marcarla bloqueada con su motivo |
+  | Nombre de rama | Pedirle al tracker el nombre de la rama, si lo da |
+
+  En este paso **solo se llaman herramientas que leen**. Lee la descripción de
+  cada herramienta antes de asignarla. Lo que el conector no permita, o que
+  solo se pueda obtener **escribiendo**, queda como **«no tiene»** con su
+  sustituto. Por ejemplo, si la única forma de obtener el nombre de rama es
+  una herramienta que *crea* la rama, no la llames: el sustituto es el formato
+  que diga su descripción o `<prefijo>-<clave>-<titulo-corto>`. Bloquear sin
+  herramienta propia → comentario «BLOQUEADA: <motivo>».
+
+  En este orden:
+  1. **Busca el proyecto** (por el nombre del repo y el del README), sugiere
+     los candidatos con el más probable primero y confirma con el dueño. Su
+     **clave** se guarda en el Paso 5. Si no existe, crearlo es decisión del
+     dueño. **Nunca pruebes con el proyecto de otro.**
+  2. **Prueba la tabla leyendo** ese proyecto: ver el tablero y ver una
+     actividad. Si el proyecto todavía no existe, prueba solo lo que no lo
+     necesita (listar proyectos) y anota que el resto queda sin probar. Las
+     escrituras **no se prueban**, salvo que la herramienta tenga un modo de
+     simulación explícito (p. ej. un parámetro `simular` o `dry_run`). Las
+     que no se probaron quedan marcadas «sin probar» en la tabla.
+  3. **Anota las columnas:** las de Capitán son Backlog, Por hacer, En curso,
+     Revisión de código, Pruebas funcionales, Por desplegar y Listo. Para cada
+     una, escribe el valor exacto que acepta la herramienta de mover (el
+     código, p. ej. `in_progress`) y cómo se ve en el tracker; si alguna no
+     existe ahí, dilo.
+  4. **Anota lo que el tracker hace solo**, porque cambia cómo trabaja
+     `/capitan:trabajar`. Por ejemplo, que marcar subtareas mueve la tarjeta,
+     que solo se puede mover a la columna contigua, o que el merge en GitHub
+     la mueve. Sale de las descripciones de las herramientas.
+  5. **Enséñale la tabla al dueño** antes de guardarla: las escrituras
+     (mover, comentar, bloquear) se harán en su tracker.
+- **Lo escribió a mano** → si ese sistema tiene un conector MCP que no está
+  instalado, dile cuál es y cómo agregarlo (`claude mcp add …` o el conector de
+  su organización), y que al tenerlo vuelva a correr este paso. Mientras tanto,
+  o si no tiene conector, ofrécele el tablero local. **No inventes** una tabla
+  para herramientas que no puedes ver.
+- **Tablero local**, o dice que no tiene sistema de seguimiento → se crea con
   `python3 {CAPITAN}/scripts/tablero.py init "<nombre>"` en `docs/capitan/`:
   un JSON versionado en git y una página `tablero.html` que se abre en el
   navegador. Pregunta el prefijo de ramas (por omisión, el nombre del repo).
@@ -117,9 +191,12 @@ Lo que no encuentres se pregunta; lo que el dueño no sepa queda como
 
 **Enséñalo antes de escribirlo.**
 
-1. `.claude/capitan.md`: tabla de campos (incluido `Tracker: mcp
+1. `.claude/capitan.md`: tabla de campos (incluido `Tracker: mcp <servidor>
    <clave>` o `Tracker: local · prefijo <x>`), CI-equivalente, alcance vigente
-   y reglas propias. Su existencia es lo que **enciende los hooks** del plugin
+   y reglas propias. Con tracker MCP, además, una sección `## Tracker` con
+   todo lo del Paso 2: la tabla de equivalencias (operación → herramienta, o
+   «no tiene» y su sustituto, y cuáles quedaron «sin probar»), las columnas
+   con su valor exacto y lo que el tracker hace solo. Su existencia es lo que **enciende los hooks** del plugin
    en este repo.
 2. `docs/capitan/`:
    - `estado.md` con el formato de `/capitan:trabajar` (§La memoria del proyecto):
@@ -161,7 +238,7 @@ Si el repo venía con `.claude/work-tracker-plan.md`:
 
 ```
 Listo para /capitan:trabajar: sí / no
-Tracker: mcp <clave> — <nombre>  |  local (docs/capitan/tablero.html)
+Tracker: mcp <servidor> <clave> — <nombre> (equivalencias en .claude/capitan.md)  |  local (docs/capitan/tablero.html)
 Config: .claude/capitan.md (sin commit) · Memoria: docs/capitan/
 Herramientas: <✅/❌ por línea>
 Falta: <lo pendiente, con quién lo resuelve>
