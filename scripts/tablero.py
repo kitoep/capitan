@@ -367,7 +367,7 @@ def metricas(a: dict) -> dict:
     t_ini = _fecha(ini["cuando"]) if ini else None
     t_fin = _fecha(fin["cuando"]) if fin else None
     ya = dt.datetime.now()
-    # Consumo (decisión del dueño 2026-10-18/20, Tracker ACT-058): lo que marcó el medidor entre que la actividad entra a
+    # Consumo: lo que marcó el medidor entre que la actividad entra a
     # En curso y que pasa a Revisión de código, aunque otra corra en paralelo; el retrabajo abre otra ventana y se suman.
     costo = semana = None
     for v_ini, v_fin in ventanas(bit):
