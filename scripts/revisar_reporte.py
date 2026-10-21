@@ -141,9 +141,7 @@ def revisar(md_path: Path, html_path: Path, anterior: Path | None) -> list[str]:
     if 'class="b-paso"' not in html or "<textarea" not in html:
         faltas.append("[html] los pendientes no tienen botones o comentario")
 
-    # Cada hallazgo ABIERTO trae su solución recomendada completa, a la vista
-    # (decisión del dueño, 2026-10-08: «explica más detalle de la solución
-    # recomendada, siempre»).
+    # Cada hallazgo ABIERTO trae su solución recomendada completa, a la vista.
     for bloque in re.findall(r'<li class=.hall abierto.*?</li>(?=<li class=.hall|</ul>)', html, re.DOTALL):
         hid = re.search(r'id="hall-([^"]*)"', bloque)
         nombre = hid.group(1) if hid else "?"
