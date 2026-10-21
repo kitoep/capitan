@@ -326,6 +326,36 @@ def consumo_ventana(bit: list, ini: dict | None, fin: dict | None, abierta: bool
     return costo, semana
 
 
+def ventanas(bit: list) -> list:
+    """Las ventanas de consumo: de cada «→ En curso» a la siguiente «→ Revisión de código» (o «→ Listo» si el flujo no
+    pasa por Revisión). La última puede seguir abierta (fin None)."""
+    lista, abierta = [], None
+    for x in bit:
+        # Solo movimientos («Origen → Destino», con «(retrabajo)» si retrocede); no un texto con flechas adentro.
+        mov = re.fullmatch(r"[^→]+ → ([^→(]+?)(?: \(retrabajo\))?", x["que"])
+        destino = mov.group(1) if mov else None
+        if destino == "En curso" and abierta is None:
+            abierta = x
+        elif abierta is not None and destino in ("Revisión de código", "Listo"):
+            lista.append((abierta, x)); abierta = None
+    if abierta is not None:
+        lista.append((abierta, None))
+    return lista
+
+
+def en_paralelo(m: dict, clave: str) -> bool:
+    """Alguna ventana de esta actividad se cruza con la de otra (estricto: el relevo en el mismo minuto no cuenta)."""
+    ahora = dt.datetime.now()
+    for i, f in m[clave]["ventanas"]:
+        for otra, mo in m.items():
+            if otra == clave:
+                continue
+            for oi, of in mo["ventanas"]:
+                if i < (of or ahora) and oi < (f or ahora):
+                    return True
+    return False
+
+
 def metricas(a: dict) -> dict:
     """Fechas, tiempos y consumo calculados de la bitácora; nada se guarda aparte."""
     bit = a.get("bitacora", [])
@@ -337,7 +367,15 @@ def metricas(a: dict) -> dict:
     t_ini = _fecha(ini["cuando"]) if ini else None
     t_fin = _fecha(fin["cuando"]) if fin else None
     ya = dt.datetime.now()
-    costo, semana = consumo_ventana(bit, ini, fin, a["columna"] != "listo")
+    # Consumo (decisión del dueño 2026-10-18/20, Tracker ACT-058): lo que marcó el medidor entre que la actividad entra a
+    # En curso y que pasa a Revisión de código, aunque otra corra en paralelo; el retrabajo abre otra ventana y se suman.
+    costo = semana = None
+    for v_ini, v_fin in ventanas(bit):
+        c, s = consumo_ventana(bit, v_ini, v_fin, v_fin is None and a["columna"] != "listo")
+        if c is not None:
+            costo = (costo or 0.0) + c
+        if s is not None:
+            semana = (semana or 0.0) + s
     return {
         "creada": creada.strftime("%Y-%m-%d") if creada else "",
         "ultimo": ultimo.strftime("%Y-%m-%d %H:%M") if ultimo else "",
@@ -348,6 +386,7 @@ def metricas(a: dict) -> dict:
         "inicio": t_ini.strftime("%Y-%m-%d %H:%M") if t_ini else "",
         "fin": t_fin.strftime("%Y-%m-%d %H:%M") if t_fin else "",
         "costo": costo, "semana": semana,
+        "ventanas": [(_fecha(i["cuando"]), _fecha(f["cuando"]) if f else None) for i, f in ventanas(bit)],
         "retrabajos": sum("(retrabajo)" in x["que"] for x in bit),
     }
 
@@ -419,7 +458,8 @@ def render(t: dict) -> str:
         mk = m[k]
         if mk["costo"] is None and mk["semana"] is None:
             return "—"
-        return f"{_pct(mk['semana'])} · {_usd(mk['costo'])}"
+        # En paralelo: su consumo incluye el de la otra; no se suman como si fueran separados.
+        return f"{_pct(mk['semana'])} · {_usd(mk['costo'])}" + (" · en paralelo" if en_paralelo(m, k) else "")
 
     def depende_txt(a: dict) -> str:
         partes = []
