@@ -30,7 +30,8 @@ tarea. No se resume ni se omite: es lo que evita los errores del 2026-10-02.
    pida expresamente.
 7. **No satures la máquina.** Antes de cada corrida pesada (pruebas, build,
    instalar, contenedores, navegador) mira `uptime`; si la carga pasa del
-   límite que dice el encargo, espera. No reinstales dependencias si ya existen
+   límite que dice el encargo (puede haber otros agentes pesados corriendo a la
+   vez), espera. No reinstales dependencias si ya existen
    en otra copia con el mismo archivo de bloqueo: usa un acceso directo. Corre
    la suite completa una sola vez, al final, con pocos procesos en paralelo.
 
