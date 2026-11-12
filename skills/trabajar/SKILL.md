@@ -241,21 +241,26 @@ el reporte.
 **Entorno local:** levanta solo lo que la actividad necesita y **apágalo al
 terminar**.
 
-### Capacidad de la máquina: la del dueño no es un servidor
+### Capacidad de la máquina: la de desarrollo no es un servidor
 
 Los agentes en paralelo ahorran tiempo de reloj, pero cada uno que corre
 pruebas trae su propia base de datos, sus dependencias y su navegador. Varios a
-la vez saturan una laptop (la carga se dispara, el motor de contenedores se cae)
+la vez saturan una máquina de desarrollo (la carga se dispara, el motor de contenedores se cae)
 y el dueño se queda sin poder trabajar.
 
-- **Un solo trabajo pesado a la vez.** Pesado = instalar dependencias, correr
-  pruebas o builds, levantar contenedores o un navegador. Los agentes de solo
-  lectura (planear, criticar, revisar seguridad) sí van en paralelo: casi no
-  cargan.
-- **Mide antes de lanzar.** `uptime` (carga contra el número de núcleos) y la
-  memoria libre. Si la carga pasa de los núcleos, espera; si no baja, avisa al
-  dueño qué está corriendo y propón qué detener. Dilo en el encargo: «si la
-  carga pasa de N, espera».
+- **Cuántos trabajos pesados a la vez lo decide la capacidad, no un número
+  fijo.** Pesado = instalar dependencias, correr pruebas o builds, levantar
+  contenedores o un navegador. Los agentes de solo lectura (planear, criticar,
+  revisar seguridad) casi no cargan y van en paralelo sin contarlos.
+- **Mide antes de lanzar cada uno:** núcleos (`nproc` / `sysctl -n hw.ncpu`),
+  carga de 1 minuto (`uptime`) y memoria libre. Como guía, un trabajo pesado
+  suma unos 3–4 puntos de carga y ~2 GB. Se lanza otro mientras la carga quede
+  por debajo de ~70 % de los núcleos y haya memoria de sobra; si la carga pasa
+  del número de núcleos, no se lanza nada más y se espera. En una máquina con
+  muchos núcleos caben varios; en una chica, uno.
+- **Dilo en cada encargo:** cuántos pesados corren junto a ese agente y el
+  límite de carga a partir del cual debe esperar («si la carga pasa de N,
+  espera»), y que use pocos procesos en paralelo dentro de sus propias pruebas.
 - **Copias de trabajo ligeras.** Si cada actividad vive en su `git worktree`:
   - las dependencias no se reinstalan por copia: si el archivo de bloqueo
     (`package-lock.json`, `poetry.lock`…) es idéntico, se usa un acceso directo
@@ -265,7 +270,8 @@ y el dueño se queda sin poder trabajar.
   - al cerrar la actividad se borran su carpeta de dependencias, su imagen y la
     copia (`git worktree remove`), y de vez en cuando `git worktree prune`.
 - **Si el dueño dice que la máquina va lenta**, se detiene todo lo pesado en el
-  acto (agentes incluidos), se le dice qué estaba corriendo y se sigue de a uno.
+  acto (agentes incluidos), se le dice qué estaba corriendo, y se reanuda
+  midiendo otra vez: con menos trabajos a la vez si hace falta.
 
 ## Encargos a agentes: el brief base, mecánico
 
