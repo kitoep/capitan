@@ -241,6 +241,32 @@ el reporte.
 **Entorno local:** levanta solo lo que la actividad necesita y **apágalo al
 terminar**.
 
+### Capacidad de la máquina: la del dueño no es un servidor
+
+Los agentes en paralelo ahorran tiempo de reloj, pero cada uno que corre
+pruebas trae su propia base de datos, sus dependencias y su navegador. Varios a
+la vez saturan una laptop (la carga se dispara, el motor de contenedores se cae)
+y el dueño se queda sin poder trabajar.
+
+- **Un solo trabajo pesado a la vez.** Pesado = instalar dependencias, correr
+  pruebas o builds, levantar contenedores o un navegador. Los agentes de solo
+  lectura (planear, criticar, revisar seguridad) sí van en paralelo: casi no
+  cargan.
+- **Mide antes de lanzar.** `uptime` (carga contra el número de núcleos) y la
+  memoria libre. Si la carga pasa de los núcleos, espera; si no baja, avisa al
+  dueño qué está corriendo y propón qué detener. Dilo en el encargo: «si la
+  carga pasa de N, espera».
+- **Copias de trabajo ligeras.** Si cada actividad vive en su `git worktree`:
+  - las dependencias no se reinstalan por copia: si el archivo de bloqueo
+    (`package-lock.json`, `poetry.lock`…) es idéntico, se usa un acceso directo
+    (`ln -s`) a la carpeta de dependencias de otra copia;
+  - la imagen de pruebas lleva **nombre fijo** en el compose (`image:`), para que
+    cada `docker compose -p <copia>` la reuse en vez de construir la suya;
+  - al cerrar la actividad se borran su carpeta de dependencias, su imagen y la
+    copia (`git worktree remove`), y de vez en cuando `git worktree prune`.
+- **Si el dueño dice que la máquina va lenta**, se detiene todo lo pesado en el
+  acto (agentes incluidos), se le dice qué estaba corriendo y se sigue de a uno.
+
 ## Encargos a agentes: el brief base, mecánico
 
 **Los hooks del plugin lo hacen cumplir** en todo repo con `.claude/capitan.md` (además de los de §Registro de decisiones):
