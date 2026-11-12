@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.7.4-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.7.6-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
