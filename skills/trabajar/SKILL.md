@@ -269,8 +269,16 @@ y el dueño se queda sin poder trabajar.
     cada `docker compose -p <copia>` la reuse en vez de construir la suya;
   - al cerrar la actividad se borran su carpeta de dependencias, su imagen y la
     copia (`git worktree remove`), y de vez en cuando `git worktree prune`.
-- **Si el dueño dice que la máquina va lenta**, se detiene todo lo pesado en el
-  acto (agentes incluidos), se le dice qué estaba corriendo, y se reanuda
+- **Regulación dinámica mientras corren.** Medir antes de lanzar no basta: la
+  carga sube a media corrida. Con varios trabajos pesados en paralelo, deja
+  corriendo en segundo plano `{CAPITAN}/scripts/regulador_de_carga.sh
+  <prefijo-de-proyectos>`: si la carga pasa de los núcleos, pausa los
+  contenedores del trabajo más nuevo (`docker pause`; nada se pierde) y los
+  reanuda cuando baja de ~60 %. Las corridas propias también cuentan como
+  trabajo pesado. Para que funcione, cada trabajo usa su propio proyecto de
+  compose con un prefijo común (`docker compose -p <prefijo><n>`).
+- **Si el dueño dice que la máquina va lenta**, se detiene o pausa lo pesado en
+  el acto (agentes incluidos), se le dice qué estaba corriendo, y se reanuda
   midiendo otra vez: con menos trabajos a la vez si hace falta.
 
 ## Encargos a agentes: el brief base, mecánico
