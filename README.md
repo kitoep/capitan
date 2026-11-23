@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.1-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.2-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
@@ -141,13 +141,13 @@ de la actividad (abajo).
 | 2 | **En curso y checklist** | La tarjeta se mueve solo a la columna de al lado y recibe el checklist del ciclo | Tarjeta en En curso, checklist creado y el paso 1 marcado; trae la hora y el uso de inicio |
 | 3 | **Plan** | Problema, archivos, decisiones con alternativas, riesgos, orden y cómo sabrá que quedó | Sin plan escrito no hay código |
 | 4 | **Crítica** y **seguridad del plan** | Dos agentes en paralelo | Cada punto se corrige o se justifica por escrito, antes del código; lo que cambie del plan entra a la lista de desvíos |
-| 5 | **Plan de pruebas** | Un agente que solo conoce los criterios; no arranca hasta cerrar el 4 | Plan escrito, con adversariales y lo que debe fallar hoy |
+| 5 | **Plan de pruebas** | Un agente que solo conoce los criterios; corre a la vez que el 4 | Plan escrito, con adversariales y lo que debe fallar hoy |
 | 6 | **Si es bug, reproducirlo** | Un test que falla hoy, con la salida pegada | Sin reproducción no hay arreglo |
 | 7 | **Implementar** | Con las convenciones del repo y una lista de desvíos respecto al plan (incluye lo que cambió la crítica) | Reglas del repo intactas |
 | 8 | **UI** | Con el design system y la puerta visual que diga la config | Medida en el navegador, no leída en el código: emergentes abiertos, foco y accesibilidad |
 | 9 | **Ajustar las pruebas** | Si la crítica cambió el plan o hubo desvíos, el agente de pruebas los recibe | El plan de pruebas cubre cada desvío; sin ninguno, «no aplica» |
-| 10 | **Ejecutar las pruebas** | Tests y recorridos E2E con captura de cada paso, claro/oscuro y dos anchos | Verde con el cambio **y rojo sin él** |
-| 11 | **Seguridad del diff** | En **toda** actividad | Cada hallazgo se cierra o se justifica |
+| 10 | **Ejecutar las pruebas** | Tests y recorridos E2E con captura de cada paso, claro/oscuro y dos anchos; a la vez que el 11, sobre el mismo commit | Verde con el cambio **y rojo sin él**; prueba también lo que haya arreglado seguridad |
+| 11 | **Seguridad del diff** | En **toda** actividad, a la vez que el 10 | Cada hallazgo se cierra o se justifica; revisa también lo que haya arreglado el probador |
 | 12 | **Verificador** | CI local y puerta visual, con evidencia ejecutada | Todo verde o no se sube, con el conteo literal de la salida (no un «todo verde» de memoria) y el commit registrado por el CI local |
 | 13 | **Entregar** | Commits con la clave, merge `--no-ff` a la rama de sesión | Nunca a la principal, nunca squash |
 | 14 | **Hallazgos** | Al registro de defectos, con la solución recomendada completa | — |
@@ -173,7 +173,9 @@ tracker ve en qué paso va y cuál falta.
 - **Lo que se salta con tu permiso** queda como «omitido», con quién lo
   permitió y por qué. Sin tu permiso no se salta nada.
 - **El checklist manda el orden.** Un paso no empieza sin cerrar el anterior,
-  la puerta es la condición para marcarlo, y ni la prisa ni el uso de la
+  salvo los revisores que no dependen uno del otro y corren a la vez: crítica
+  y plan de pruebas (4 y 5), probador y seguridad del diff (10 y 11). Si uno
+  provoca un cambio, el otro lo revisa antes de cerrar su paso. La puerta es la condición para marcarlo, y ni la prisa ni el uso de la
   cuenta justifican saltarse uno. Si hay que parar, para con el checklist al
   día, y la siguiente conversación retoma en el primer paso abierto.
 - **Documentar es siempre lo último** (paso 16). Si tu tracker mueve la
@@ -182,7 +184,7 @@ tracker ve en qué paso va y cuál falta.
   la columna y la corrige si hace falta.
 
 Con el tablero local, `tablero.py` lo hace cumplir: no marca un paso con uno
-anterior abierto y no pasa la tarjeta a Revisión de código con pasos abiertos.
+anterior abierto (salvo su par en paralelo) y no pasa la tarjeta a Revisión de código con pasos abiertos.
 
 ---
 
@@ -227,7 +229,7 @@ cuesta una actividad nueva.
 </details>
 
 <details>
-<summary><b>🧪 Planeador de pruebas</b> · Opus · paso 5, antes de escribir código</summary>
+<summary><b>🧪 Planeador de pruebas</b> · Opus · paso 5, a la vez que el crítico</summary>
 
 **Recibe:** **solo** los criterios de aceptación tal como están escritos, y
 los defectos relacionados.
@@ -253,7 +255,7 @@ pidió.
 </details>
 
 <details>
-<summary><b>▶️ Probador</b> · Sonnet · paso 10</summary>
+<summary><b>▶️ Probador</b> · Sonnet · paso 10, a la vez que la seguridad del diff</summary>
 
 **Recibe:** el plan de pruebas y el diff, y corre los tests de código y los
 **recorridos E2E** en el entorno local, con un usuario de prueba (nunca
@@ -266,7 +268,7 @@ un resultado esperado para que una prueba pase.
 </details>
 
 <details>
-<summary><b>🛡️ Seguridad del diff</b> · Opus · paso 11, en toda actividad</summary>
+<summary><b>🛡️ Seguridad del diff</b> · Opus · paso 11, en toda actividad y a la vez que el probador</summary>
 
 **Recibe:** el diff completo.
 
