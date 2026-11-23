@@ -35,6 +35,20 @@ except Exception:
 if not os.path.exists(os.path.join(cwd, ".claude", "capitan.md")):
     sys.exit(0)
 
+
+try:
+    import datetime as _dt
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from version_plugin import aviso_version
+    _aviso = aviso_version(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        os.path.join(os.path.expanduser("~"), ".claude", "plugins", "marketplaces"),
+        os.path.join(os.path.expanduser("~"), ".claude", "capitan", "version-revisada"),
+        _dt.date.today().isoformat(),
+    )
+except Exception:
+    _aviso = None
+
 intro = (
     "Este proyecto usa el método Capitán (plugin capitan). Antes de trabajar, "
     "lo que sigue es el relevo de la sesión anterior y las decisiones vigentes del dueño. "
@@ -61,4 +75,9 @@ if por_leer:
         "docs/capitan/decisiones-historial.md."
     )
 
-print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "\n\n".join(partes)}}))
+salida = {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "\n\n".join(partes)}}
+if _aviso:
+    partes.append("AVISO PARA EL DUEÑO (díselo al empezar): " + _aviso)
+    salida["hookSpecificOutput"]["additionalContext"] = "\n\n".join(partes)
+    salida["systemMessage"] = "capitan: " + _aviso
+print(json.dumps(salida))
