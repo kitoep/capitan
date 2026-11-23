@@ -215,8 +215,24 @@ Lo que no encuentres se pregunta; lo que el dueño no sepa queda como
    «no tiene» y su sustituto, y cuáles quedaron «sin probar»), las columnas
    con su valor exacto y, en una sub-sección `### Lo que hace solo`, las
    respuestas del Paso 2 (subtareas que mueven la tarjeta, a qué columna,
-   si hay repositorio ligado). Su existencia es lo que **enciende los hooks** del plugin
-   en este repo.
+   si hay repositorio ligado).
+   La existencia de `.claude/capitan.md` es lo que **enciende los hooks** del
+   plugin en este repo.
+
+   **`## Tracker` lleva forma fija**, porque un candado la lee
+   (`hook_tracker.py`): la primera celda es el nombre de la operación o de la
+   columna de Capitán tal cual, y la herramienta o el valor exacto van entre
+   backticks, con los nombres reales del conector, nunca inventados:
+
+   ```
+   | Operación | Herramienta | Notas |
+   |---|---|---|
+   | Mover | `<herramienta real>` | solo a la contigua |
+
+   | Columna de Capitán | Valor | Cómo se ve en el tracker |
+   |---|---|---|
+   | Revisión de código | `<valor real>` | … |
+   ```
 2. `docs/capitan/`:
    - `estado.md` con el formato de `/capitan:trabajar` (§La memoria del proyecto):
      `**Actualizado:**`, `## Dónde quedó`, `## Lo que sigue`, `## Esperando al

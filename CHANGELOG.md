@@ -1,5 +1,48 @@
 # Cambios
 
+## 0.8.1 — Candados donde el checklist no alcanzaba
+
+La 0.8.0 hizo visible el ciclo, pero con un tracker por MCP el checklist
+seguía siendo una regla de palabra. En una sesión real, con varias
+actividades:
+- ninguna tuvo hora ni uso medidos;
+- el relevo se escribió solo al final;
+- se declaró «CI verde» cuando parte de la suite nunca corrió por un error
+  del shell.
+
+**Qué cambia**
+
+- **Candado al pasar a Revisión con tracker MCP** (`hook_tracker.py`). Corre
+  cuando la herramienta «Mover» de `## Tracker` lleva una tarjeta a «Revisión
+  de código», y bloquea si:
+  - `docs/capitan/estado.md` no se reescribió después del merge de la
+    actividad;
+  - o su línea no trae la hora de inicio y de cierre (`HH:MM → HH:MM`) y el
+    uso gastado.
+
+  Si no puede leer la config o no encuentra el merge, avisa y no bloquea.
+- **La medición entra al checklist.** La evidencia del paso 2 trae la hora y
+  el uso de inicio; la del 16, los de cierre. La línea de cada actividad en
+  `estado.md` los lleva.
+- **El paso 12 exige prueba.** La evidencia es el conteo literal de la salida
+  («412 passed, 0 failed») y el commit registrado por `ci_local.py`. Ahora
+  `ci_local.py`:
+  - guarda las últimas líneas de la salida en `.git/capitan/ci-registro.log`;
+  - no da por verde una corrida con errores del propio shell (comando no
+    encontrado, error de sintaxis), aunque salga 0.
+- **Aviso de versión.** Al abrir, una vez al día, se compara la versión
+  instalada con la del repo del plugin. Si hay una más nueva, avisa; si la
+  copia local del marketplace divergió de su remoto y por eso no se actualiza
+  sola, también lo dice.
+- **`/capitan:configurar`** escribe `## Tracker` con forma fija (operación o
+  columna en la primera celda, herramienta o valor entre backticks), porque el
+  candado la lee.
+
+**Proyectos ya configurados:** si su `## Tracker` no trae las filas «Mover» y
+«Revisión de código» con la herramienta y el valor entre backticks, el candado
+avisa y no bloquea. Corre el Paso 2 de `/capitan:configurar` para dejarlo en
+forma.
+
 ## 0.8.0 — El checklist del ciclo
 
 Cada actividad lleva en su tarjeta un checklist con los 16 pasos de su ciclo,

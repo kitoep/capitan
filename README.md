@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.0-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.1-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
@@ -138,7 +138,7 @@ de la actividad (abajo).
 | # | Paso | Cómo | Puerta: cuándo se puede marcar |
 |---|---|---|---|
 | 1 | **Rama propia** | Una actividad = una rama, desde la principal al día | Nada de PRs apilados |
-| 2 | **En curso y checklist** | La tarjeta se mueve solo a la columna de al lado y recibe el checklist del ciclo | Tarjeta en En curso, checklist creado y el paso 1 marcado |
+| 2 | **En curso y checklist** | La tarjeta se mueve solo a la columna de al lado y recibe el checklist del ciclo | Tarjeta en En curso, checklist creado y el paso 1 marcado; trae la hora y el uso de inicio |
 | 3 | **Plan** | Problema, archivos, decisiones con alternativas, riesgos, orden y cómo sabrá que quedó | Sin plan escrito no hay código |
 | 4 | **Crítica** y **seguridad del plan** | Dos agentes en paralelo | Cada punto se corrige o se justifica por escrito, antes del código; lo que cambie del plan entra a la lista de desvíos |
 | 5 | **Plan de pruebas** | Un agente que solo conoce los criterios; no arranca hasta cerrar el 4 | Plan escrito, con adversariales y lo que debe fallar hoy |
@@ -148,11 +148,11 @@ de la actividad (abajo).
 | 9 | **Ajustar las pruebas** | Si la crítica cambió el plan o hubo desvíos, el agente de pruebas los recibe | El plan de pruebas cubre cada desvío; sin ninguno, «no aplica» |
 | 10 | **Ejecutar las pruebas** | Tests y recorridos E2E con captura de cada paso, claro/oscuro y dos anchos | Verde con el cambio **y rojo sin él** |
 | 11 | **Seguridad del diff** | En **toda** actividad | Cada hallazgo se cierra o se justifica |
-| 12 | **Verificador** | CI local y puerta visual, con evidencia ejecutada | Todo verde o no se sube |
+| 12 | **Verificador** | CI local y puerta visual, con evidencia ejecutada | Todo verde o no se sube, con el conteo literal de la salida (no un «todo verde» de memoria) y el commit registrado por el CI local |
 | 13 | **Entregar** | Commits con la clave, merge `--no-ff` a la rama de sesión | Nunca a la principal, nunca squash |
 | 14 | **Hallazgos** | Al registro de defectos, con la solución recomendada completa | — |
 | 15 | **Relevo** | Reescribe `estado.md` y anota todo para el reporte | Al día **antes** de documentar y de tomar la siguiente |
-| 16 | **Documentar en el tracker** | Revisa el checklist completo, comentario de cierre y a Revisión de código | Pasos 1–15 cerrados y el comentario publicado. Siempre es lo último |
+| 16 | **Documentar en el tracker** | Revisa el checklist completo, comentario de cierre y a Revisión de código | Pasos 1–15 cerrados y el comentario publicado; trae la hora y el uso de cierre. Siempre es lo último |
 
 Una actividad chica (solo textos o estilos) cierra la crítica como «no aplica:
 actividad chica», pero nunca se salta las pruebas ni la seguridad del diff.
@@ -478,10 +478,16 @@ le pide a nadie que se acuerde de pagar, simplemente no gira sin boleto.
 | **Brief de cada agente** | Al encargar a un agente | 🛑 Bloquea el encargo si no trae las reglas base | Un agente probó pero no compiló, y rompió el trabajo de todos |
 | **Agentes sin git** | En cada comando de un agente | 🛑 Bloquea commits, cambios de rama, merges, stash… | Un agente aplicó cambios viejos y dejó el repo en conflicto |
 | **Juez de decisiones** | Antes de `git merge` y `gh pr create` | 🛑 Otro modelo (Sonnet) compara lo que dijiste con `decisiones.md` y bloquea si falta algo, citando tus palabras | Es el único que gasta uso, por eso corre solo en esos dos momentos |
+| **Relevo antes de Revisión** | Al pasar una tarjeta a Revisión de código en un tracker por MCP | 🛑 Exige `estado.md` reescrito después del merge de la actividad, con su hora de inicio y cierre y el uso gastado | En una sesión, ninguna actividad tuvo hora ni uso medidos y el relevo se escribió solo al final |
+| **CI que de verdad corrió** | Al correr `ci_local.py` | 🛑 No da por verde una corrida con errores del shell, aunque salga 0, y guarda las últimas líneas de la salida como evidencia | Un «CI verde» se declaró cuando la mitad de las pruebas nunca corrió por un error del shell |
 | **Push con pruebas** | `git push` de una rama con PR abierto | 🛑 Exige el CI local en verde sobre ese mismo commit | Un PR corrió las pruebas de GitHub tres veces en una hora, y cada corrida se cobra |
 
 Si un candado no puede correr (por ejemplo, sin internet), **avisa y deja
 pasar** en vez de bloquear.
+
+Al abrir, una vez al día, Capitán revisa también si hay una versión más nueva
+del plugin que la instalada y te avisa, porque la copia local no siempre se
+actualiza sola.
 
 ---
 
