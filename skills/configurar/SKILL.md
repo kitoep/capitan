@@ -98,7 +98,9 @@ tablero local y la opción de escribirlo.
 **3. Según lo que conteste:**
 
 - **Un servidor MCP** → arma la **tabla de equivalencias**: qué herramienta de
-  ese servidor hace cada operación de `/capitan:trabajar`.
+  ese servidor hace cada operación de `/capitan:trabajar`. Las operaciones
+  tienen nombres genéricos; **no des por hecho ningún nombre de herramienta**:
+  cada una se busca entre las del conector conectado, leyendo su descripción.
 
   | Operación | Qué debe hacer |
   |---|---|
@@ -107,6 +109,8 @@ tablero local y la opción de escribirlo.
   | Crear | Crear una actividad con título, descripción y, si se puede, subtareas, dependencias y fechas |
   | Mover | Cambiarla de columna o de estado |
   | Subtareas | Marcar una subtarea (o casilla de la lista) como hecha |
+  | Agregar subtarea | Agregar subtareas a una actividad que ya existe (para el checklist del ciclo) |
+  | Renombrar subtarea | Cambiar el título de una subtarea (ahí va la evidencia de cada paso del ciclo) |
   | Comentar | Dejar un comentario en la actividad |
   | Bloquear | Marcarla bloqueada con su motivo |
   | Nombre de rama | Pedirle al tracker el nombre de la rama, si lo da |
@@ -136,9 +140,22 @@ tablero local y la opción de escribirlo.
      código, p. ej. `in_progress`) y cómo se ve en el tracker; si alguna no
      existe ahí, dilo.
   4. **Anota lo que el tracker hace solo**, porque cambia cómo trabaja
-     `/capitan:trabajar`. Por ejemplo, que marcar subtareas mueve la tarjeta,
-     que solo se puede mover a la columna contigua, o que el merge en GitHub
-     la mueve. Sale de las descripciones de las herramientas.
+     `/capitan:trabajar`. Sale de las descripciones de las herramientas; lo
+     que no digan, **pregúntaselo al dueño** y no lo adivines. Contesta
+     siempre estas, porque el checklist del ciclo depende de ellas:
+     - ¿Marcar una subtarea mueve la tarjeta? ¿La primera marcada la pasa a
+       En curso?
+     - ¿Completar el desglose la mueve? ¿A qué columna?
+     - ¿El proyecto tiene repositorio ligado en el tracker? (Sin repositorio,
+       algunos trackers mandan la tarjeta a Listo al completarse el desglose:
+       así trabajar sabe a qué columna va a caer al marcar el último paso y
+       lo confirma.)
+     - ¿Solo se mueve a la columna contigua? ¿El merge en GitHub la mueve?
+     - ¿Las subtareas solo tienen abierta/cerrada? (Entonces «no aplica» se
+       cierra y se renombra.)
+     Si el conector no puede **agregar** subtareas a una actividad existente,
+     el checklist del ciclo no se puede llevar ahí: díselo al dueño y anota el
+     sustituto que decida.
   5. **Enséñale la tabla al dueño** antes de guardarla: las escrituras
      (mover, comentar, bloquear) se harán en su tracker.
 - **Lo escribió a mano** → si ese sistema tiene un conector MCP que no está
@@ -196,7 +213,9 @@ Lo que no encuentres se pregunta; lo que el dueño no sepa queda como
    y reglas propias. Con tracker MCP, además, una sección `## Tracker` con
    todo lo del Paso 2: la tabla de equivalencias (operación → herramienta, o
    «no tiene» y su sustituto, y cuáles quedaron «sin probar»), las columnas
-   con su valor exacto y lo que el tracker hace solo. Su existencia es lo que **enciende los hooks** del plugin
+   con su valor exacto y, en una sub-sección `### Lo que hace solo`, las
+   respuestas del Paso 2 (subtareas que mueven la tarjeta, a qué columna,
+   si hay repositorio ligado). Su existencia es lo que **enciende los hooks** del plugin
    en este repo.
 2. `docs/capitan/`:
    - `estado.md` con el formato de `/capitan:trabajar` (§La memoria del proyecto):

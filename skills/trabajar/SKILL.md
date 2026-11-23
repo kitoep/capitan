@@ -90,22 +90,26 @@ este skill** (ahí están `scripts/` y `plantillas/`).
 Con tracker MCP, **la herramienta de cada operación la dice la sección
 `## Tracker` de `.claude/capitan.md`** (la armó `/capitan:configurar` con las
 herramientas de ese conector). Úsala tal cual; si una operación dice «no
-tiene», usa el sustituto que trae. Si la config no trae esa sección (configs
-anteriores a la 0.7.4), usa los nombres de la columna «Por omisión» y, si el
-conector no los tiene, **detente** y pide correr el Paso 2 de
-`/capitan:configurar`: no adivines herramientas que escriben en el tracker del
+tiene», usa el sustituto que trae. La columna de en medio es solo el nombre
+genérico de la operación, **no el de una herramienta**: si la config no trae
+la sección `## Tracker` (configs anteriores a la 0.7.4), o le falta una
+operación que necesitas, **detente** y pide correr el Paso 2 de
+`/capitan:configurar`. No adivines herramientas que escriben en el tracker del
 dueño.
 
-| Operación | Tracker MCP · por omisión | `local` |
+| Operación | Tracker MCP (el conector la nombra en `.claude/capitan.md`) | `local` |
 |---|---|---|
-| Ver el tablero | `listar-actividades` | `python3 {CAPITAN}/scripts/tablero.py listar --abiertas` |
-| Ver una actividad | `ver-actividad` | `tablero.py ver ACT-0xx` |
-| Crear | `crear-actividades` (tipo, épica en el título, subtareas, `depende_de`, fechas) | `tablero.py crear "<Mx · título>" --epica Mx --tipo … --criterio … --subtarea … --depende … --inicia … --termina …` |
-| Mover (solo a la contigua) | `mover-actividades` | `tablero.py mover ACT-0xx <columna>` |
-| Subtareas | `gestionar-subtareas` | `tablero.py subtarea ACT-0xx <n> --hecha` |
-| Comentar | `comentar` | `tablero.py comentar ACT-0xx "<texto>"` |
-| Bloquear | `actualizar-actividades` (bloqueo con motivo) | `tablero.py bloquear ACT-0xx "<motivo>"` |
-| Nombre de rama | `crear-rama` → el canónico que devuelve | `<prefijo>-act-0xx-<titulo-corto>` |
+| Ver el tablero | listar | `python3 {CAPITAN}/scripts/tablero.py listar --abiertas` |
+| Ver una actividad | ver | `tablero.py ver ACT-0xx` |
+| Crear | crear (tipo, épica en el título, subtareas, dependencias, fechas) | `tablero.py crear "<Mx · título>" --epica Mx --tipo … --criterio … --subtarea … --depende … --inicia … --termina …` |
+| Mover (solo a la contigua) | mover | `tablero.py mover ACT-0xx <columna>` |
+| Subtareas (marcar) | subtareas | `tablero.py subtarea ACT-0xx <n> --hecha` (las propias del trabajo) |
+| Agregar subtarea | agregar subtarea (a una actividad que ya existe) | `tablero.py ciclo ACT-0xx` (el checklist del ciclo) |
+| Renombrar subtarea | renombrar subtarea; si no tiene, la evidencia va en un comentario | — (el tablero guarda la evidencia aparte) |
+| Paso del ciclo | subtareas + renombrar (§El checklist del ciclo) | `tablero.py paso ACT-0xx <n> --hecho "<evidencia>"` · `--no-aplica "<por qué>"` · `--omitido "<permiso>"` |
+| Comentar | comentar | `tablero.py comentar ACT-0xx "<texto>"` |
+| Bloquear | bloquear (con motivo) | `tablero.py bloquear ACT-0xx "<motivo>"` |
+| Nombre de rama | nombre de rama (el canónico que dé el tracker) | `<prefijo>-act-0xx-<titulo-corto>` |
 
 Columnas en los dos: Backlog → Por hacer → En curso → Revisión de código →
 Pruebas funcionales → Por desplegar → Listo. Un retroceso es retrabajo y queda
@@ -190,6 +194,9 @@ si la nueva aprieta a una existente, se avisa y el dueño decide.
    mostró.
 7. `git fetch` y parte de la rama principal al día. Árbol limpio; si no lo
    está, no toques lo ajeno — repórtalo.
+8. **¿Hay una actividad a medias?** (En curso, o con el checklist del ciclo
+   incompleto). Va primero: lee su checklist y retómala en su **primer paso
+   abierto**, no de memoria (§El checklist del ciclo).
 
 **Mide cada actividad con el reloj, no de memoria:** al empezarla y al
 cerrarla corre `date +%H:%M` y lee el medidor **de la sesión**
@@ -211,27 +218,98 @@ dudas, empieza por la parte que deja un punto limpio temprano.
 
 ## El ciclo de una actividad
 
-| # | Paso | Cómo | Puerta |
+| # | Paso | Cómo | Puerta: cuándo se puede marcar |
 |---|---|---|---|
 | 1 | **Rama propia** | nombre canónico (§El tracker) desde la rama principal | una actividad = una rama. **El PR es por SESIÓN**: la rama de actividad se sube SIN PR y al cerrarla se mergea con `--no-ff` a la rama de sesión (`{proyecto}-sesion-AAAA-MM-DD`, desde la principal al día); al detenerte, UN PR de la rama de sesión contra la principal. Nada de PRs apilados |
-| 2 | Moverla a En curso | contigua | — |
+| 2 | **Moverla a En curso y crear el checklist** | contigua; luego agrega el checklist del ciclo (§El checklist del ciclo) | la tarjeta en En curso, el checklist creado y el paso 1 marcado con el nombre de la rama |
 | 3 | **Plan** | tú, con `senior-engineer-es:planeacion`: el plan COMPLETO (problema, archivos y capas, decisiones con alternativas, riesgos, orden, cómo sabrás que quedó) | sin plan escrito no hay código |
-| 4 | **Crítica** + **seguridad del plan** (en paralelo) | agente fresco **opus** con `senior-engineer-es:critico`: recibe TODO el contexto (la actividad completa · su épica y specs · reglas del repo · el código que toca · hallazgos relacionados) y el plan — NO tu defensa. Seguridad (`senior-engineer-es:seguridad`, opus) cuando toca auth, PII, secretos, consentimiento o algo externo | cada punto se corrige en el plan o se justifica por escrito, ANTES del código |
-| 5 | **Plan de pruebas** | agente fresco **opus** con `senior-engineer-es:pruebas`: recibe SOLO los criterios textuales (y los defectos relacionados). **Ni tu plan ni tu código**: prueba lo que se pidió, no lo que tú pensaste. Adversariales primero, y qué debe fallar hoy | — |
+| 4 | **Crítica** + **seguridad del plan** (en paralelo) | agente fresco **opus** con `senior-engineer-es:critico`: recibe TODO el contexto (la actividad completa · su épica y specs · reglas del repo · el código que toca · hallazgos relacionados) y el plan — NO tu defensa. Seguridad (`senior-engineer-es:seguridad`, opus) cuando toca auth, PII, secretos, consentimiento o algo externo | cada punto se corrige en el plan o se justifica por escrito, ANTES del código. Lo que la crítica obligue a cambiar del plan entra a la **lista de desvíos** (paso 9) |
+| 5 | **Plan de pruebas** | agente fresco **opus** con `senior-engineer-es:pruebas`: recibe SOLO los criterios textuales (y los defectos relacionados). **Ni tu plan ni tu código**: prueba lo que se pidió, no lo que tú pensaste. Adversariales primero, y qué debe fallar hoy | el plan de pruebas escrito, con sus adversariales y lo que debe fallar hoy. No arranca hasta cerrar el 4 |
 | 6 | **Si es bug: reproducir** | `senior-engineer-es:reparador`: test que FALLA hoy, salida pegada | sin reproducción no hay arreglo |
-| 7 | **Implementar** | tú, con las convenciones del repo. Lleva una **lista de desvíos** respecto al plan, con su porqué | reglas del repo intactas |
+| 7 | **Implementar** | tú, con las convenciones del repo. Lleva una **lista de desvíos** respecto al plan, con su porqué (incluye lo que cambió la crítica) | reglas del repo intactas |
 | 8 | **UI** | design system y puerta visual que nombre la config | medida en el navegador, no leída en el código; emergentes ABIERTOS; foco y accesibilidad medidos |
-| 9 | **Actualizar el plan de pruebas** (si hubo desvíos) | agente fresco **opus** (`pruebas`): plan original + criterios + desvíos; sin ver el código | — |
+| 9 | **Actualizar el plan de pruebas** (si la crítica cambió el plan o hubo desvíos) | agente fresco **opus** (`pruebas`): plan original + criterios + desvíos; sin ver el código | el plan de pruebas cubre cada desvío y cada cambio de la crítica; sin ninguno, «no aplica» |
 | 10 | **Ejecutar las pruebas** | agente fresco **sonnet** (`pruebas` + `verificador`): tests de código Y **recorridos E2E** en el entorno local (usuario de prueba del repo, nunca credenciales reales), con **captura de cada paso**, emergentes abiertos, claro/oscuro, dos anchos y consola. **El E2E local no se salta**: si el usuario de prueba no entra, arreglarlo ES parte de la actividad. Cada test **verde con el cambio y ROJO contra la principal**. PROHIBIDO cambiar un resultado esperado. Recibe el diff y señala lo raro | test que no se vio fallar sin el cambio no cuenta |
 | 11 | **Seguridad sobre el diff** | agente **opus** con `senior-engineer-es:seguridad`, en TODA actividad | cada hallazgo se cierra o se justifica por escrito |
 | 12 | **Verificador** | tú, con `senior-engineer-es:verificador`: CI-equivalente local + puerta visual con evidencia ejecutada | todo verde o no se sube |
 | 13 | **Entregar** | `senior-engineer-es:entrega-git`: commits citando `{PROYECTO}/ACT-0xx`, push de LA RAMA, merge `--no-ff` a la rama de sesión (`Merge {PROYECTO}/ACT-0xx …`) | nunca la principal, nunca merge a la principal, nunca squash |
-| 14 | **Documentar en el tracker** | subtareas; comentario (plantilla abajo); mover a **Revisión de código** | — |
-| 15 | Hallazgos | al registro de defectos con su clave y, si hay trabajo, actividad nueva | cada uno con **qué pasa, dónde (archivo:línea), evidencia, el test que lo reproduciría y la SOLUCIÓN RECOMENDADA COMPLETA** (§La solución recomendada) |
-| 16 | **Relevo y notas** | reescribe `docs/capitan/estado.md`; las decisiones del dueño, a `decisiones.md` en el momento; y anota para el reporte (en `{scratchpad}/sesion.json`): horas y uso de inicio y cierre, agentes, hallazgos, trabajo nuevo y dónde se acomodó, lo no probado, resultados y capturas, qué ver, pendientes del dueño | `estado.md` al día ANTES de tomar la siguiente |
+| 14 | Hallazgos | al registro de defectos con su clave y, si hay trabajo, actividad nueva | cada uno con **qué pasa, dónde (archivo:línea), evidencia, el test que lo reproduciría y la SOLUCIÓN RECOMENDADA COMPLETA** (§La solución recomendada) |
+| 15 | **Relevo y notas** | reescribe `docs/capitan/estado.md`; las decisiones del dueño, a `decisiones.md` en el momento; y anota para el reporte (en `{scratchpad}/sesion.json`): horas y uso de inicio y cierre, agentes, hallazgos, trabajo nuevo y dónde se acomodó, lo no probado, resultados y capturas, qué ver, pendientes del dueño | `estado.md` al día ANTES de documentar en el tracker y de tomar la siguiente (anota la columna en la que la deja el paso 16) |
+| 16 | **Documentar en el tracker** | revisa el checklist completo; comentario de cierre (plantilla abajo); marca este paso, el último, y la tarjeta pasa a **Revisión de código** (o a la columna que la config diga, §El checklist del ciclo) | pasos 1–15 cerrados y el comentario de cierre publicado. Siempre es lo último |
 
-**Actividad chica** (solo textos o estilos): se puede saltar la crítica (4) —
-nunca el plan de pruebas, la ejecución ni la seguridad del diff.
+**Actividad chica** (solo textos o estilos): cierra la crítica (4) como «no
+aplica: actividad chica (solo textos o estilos)». Nunca se saltan el plan de
+pruebas, la ejecución ni la seguridad del diff.
+
+### El checklist del ciclo
+
+Cada actividad lleva, en sus subtareas, un checklist con los pasos de la tabla
+de arriba. Así cualquiera que lea el tracker ve en qué paso va, cuál falta y con
+qué evidencia se cerró cada uno, mientras la actividad corre y no solo al final.
+
+- **Se crea en el paso 2**, después de mover la tarjeta a En curso. Los títulos
+  salen de esta tabla, no se copian a mano:
+  `python3 {CAPITAN}/scripts/tablero.py ciclo --listar` los imprime
+  («Ciclo 4 · Crítica + seguridad del plan»). Con tablero local,
+  `tablero.py ciclo ACT-0xx` los agrega. Con tracker MCP, se agregan con la
+  operación «agregar subtarea». El prefijo `Ciclo N ·` los separa de las
+  subtareas propias del trabajo, que se quedan como están.
+- **Se marca en el momento**, con la evidencia: el agente y su veredicto, el
+  commit, el resultado del CI, el nombre de la rama… En el tracker MCP, la
+  evidencia va en el título («Ciclo 11 · Seguridad sobre el diff — opus: sin
+  hallazgos») o, si no deja renombrar, en un comentario corto. En el tablero
+  local, `tablero.py paso ACT-0xx <n> --hecho "<evidencia>"`.
+- **Un paso que no aplica** se cierra como «no aplica: <por qué>»: el 4 en una
+  actividad chica, el 6 si no es bug, el 8 sin UI, el 9 si la crítica no
+  cambió el plan y no hubo desvíos, el 14 sin hallazgos. Nunca se borra, nunca
+  se deja abierto y nunca se marca como hecho. Si el tracker solo tiene
+  casillas abierta/cerrada, se cierra y se renombra («Ciclo 6 · Si es bug:
+  reproducir — no aplica: es mejora») con un comentario corto; si no deja
+  renombrar, el motivo va en el comentario. Local: `--no-aplica "<por qué>"`.
+- **Un paso saltado con permiso del dueño** queda como «omitido: permiso de
+  <dueño>, <fecha>: <por qué>». Local: `--omitido "<…>"`. Sin ese permiso
+  escrito, no hay paso omitido.
+- **Nunca se marca un paso que no se hizo.**
+
+**El checklist manda; no hay excepciones:**
+
+1. **Orden.** No empiezas un paso sin haber cerrado el anterior: hecho con su
+   evidencia, «no aplica» con su motivo u omitido con el permiso del dueño.
+   Nada queda abierto «para después». El 5 no arranca hasta cerrar el 4.
+2. **La puerta es la condición para marcar.** La columna «Puerta» dice cuándo
+   un paso puede marcarse. Si la puerta no se cumple, el paso no se marca y no
+   avanzas: lo arreglas, o te detienes y avisas.
+3. **Revisión completa** antes de pasar la tarjeta a Revisión de código y
+   antes de tomar la siguiente actividad. Si un paso quedó abierto, primero lo
+   cierras.
+4. **Al retomar** una actividad a medias (sesión nueva, conversación nueva),
+   sigues en su primer paso abierto del checklist, no de memoria.
+5. **Ni la prisa ni el colchón** justifican saltar un paso. Si el uso obliga a
+   parar, paras en un punto limpio con el checklist al día: es lo que dice
+   dónde quedó.
+
+El tablero local lo hace cumplir: `paso` se niega si uno anterior sigue
+abierto y `mover … revision` se niega con pasos abiertos. Con tracker MCP es
+regla tuya.
+
+**Cuando el tracker mueve la tarjeta solo.** Algunos trackers la mueven al
+marcar subtareas: la primera marcada la pasa a En curso, y el desglose completo
+a Revisión de código (o a Listo si el proyecto no tiene repositorio). Lo que
+hace el del proyecto lo dice la config (`## Tracker`, «Lo que hace solo»). El
+checklist encaja así:
+
+- El paso 2 mueve la tarjeta a mano **antes** de crear y marcar el checklist,
+  así que no depende de que el tracker la mueva.
+- El paso 16 es siempre el último que se marca. Las subtareas propias del
+  trabajo se cierran antes. Marcar el 16 coincide con el paso a Revisión de
+  código: si el tracker la mueve solo, lo confirmas; si no, la mueves tú.
+- **Sin repositorio**, si el tracker manda la tarjeta a Listo al completarse
+  el desglose, ese es el estado correcto: la actividad la hiciste tú y el
+  comentario de cierre deja la evidencia. No dejes la casilla abierta
+  esperando al dueño.
+- Después de cada marca, mira en qué columna quedó la tarjeta. **Nunca
+  cuentes con el movimiento automático:** si no pasó, o pasó a una columna
+  que no es, corrígelo con «mover» (a la contigua) y anótalo.
 
 **Modelos:** `opus` para crítica, plan de pruebas y seguridad; `sonnet` para
 ejecutar pruebas. **Jamás Fable 5.** El sesgo que queda (todos somos el mismo
@@ -331,6 +409,7 @@ Seguridad: <veredicto>
 Crítica: <hallazgos del crítico y qué se hizo con cada uno>
 NO se probó: <lo honesto>
 Velocidad: <inicio → cierre> · uso gastado: 5 h +<x> · semana +<y> · estimado vs real
+Ciclo: <N/N cerrados> · no aplica: <pasos y por qué> · omitidos: <pasos, quién lo permitió y por qué, o «ninguno»>
 Para el dueño: <merge · recorrido · decisión>
 ```
 
@@ -373,8 +452,8 @@ actividad, después de cada paso y antes de lanzar cualquier agente**:
 Sin medidor en la config, el límite es el presupuesto del dueño o el corte que
 indique.
 
-**Punto limpio** = nada a medias sin documentar: la rama, el tracker y
-`estado.md` dicen hasta dónde llegó.
+**Punto limpio** = nada a medias sin documentar: la rama, el tracker (con el
+checklist del ciclo al día) y `estado.md` dicen hasta dónde llegó.
 
 ## Cuándo te detienes y avisas
 
@@ -435,7 +514,7 @@ En `sesion.json` va como `"solucion": {"que_cambia", "como": [...], "para_ti",
 ### La plantilla: `sesion.json` → `.md` y página
 
 El `.md` y la página salen de **una sola fuente**, `{scratchpad}/sesion.json`,
-que se va llenando en el paso 16 de cada actividad. `python3
+que se va llenando en el paso 15 de cada actividad. `python3
 {CAPITAN}/scripts/reporte.py --ejemplo` imprime su forma completa.
 
 ```
@@ -515,5 +594,5 @@ Necesito de ti: <merges · recorridos · decisiones>
 ```
 
 Si el tracker MCP pide un update semanal con fecha de corte, deja además,
-antes del corte, el **borrador** del update (p. ej. `sugerir-update-semanal`)
+antes del corte, el **borrador** del update (con la herramienta de borradores del tracker, si la tiene)
 para que el dueño lo capture él.

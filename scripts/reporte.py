@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Arma el reporte de una sesión —el .md y la página— desde UNA sola fuente:
-el `sesion.json` que se va llenando en el paso 16 del ciclo.
+el `sesion.json` que se va llenando en el paso 15 del ciclo.
 
 Uso:
   python3 reporte.py <sesion.json> --md docs/capitan/sesiones/AAAA-MM-DD.md --html <pagina.html>

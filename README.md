@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.7.8-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.0-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
@@ -69,7 +69,7 @@ nada**: lo que encuentra solo te lo confirma, y lo que no sabes queda como
 |---|---|
 | **0 · ¿Ya hay configuración?** | Si el repo ya tiene `.claude/capitan.md`, te enseña un resumen y pregunta si la **revisa** o la **rehace**. Si viene de la versión anterior del método, ofrece **migrarla**. |
 | **1 · Herramientas** | Comprueba de verdad (no supone) las skills de `senior-engineer-es`, GitHub (`gh auth status`), que git esté limpio, Python 3, el medidor de uso y que los hooks no estén duplicados. Te da una tabla ✅/❌. Si falta algo que bloquea, se detiene ahí. |
-| **2 · ¿Con qué tracker?** | **Busca los conectores MCP que tienes** y te ofrece los que parecen de seguimiento, o escribes tú el tuyo. Con el que elijas arma la **tabla de equivalencias** (qué herramienta ve, crea, mueve, comenta y bloquea), la prueba solo leyendo, te la enseña, busca el proyecto y guarda su clave. Si no tienes ninguno, o prefieres no usarlo, crea el **tablero local** dentro del repo y te pregunta el prefijo de las ramas. |
+| **2 · ¿Con qué tracker?** | **Busca los conectores MCP que tienes** y te ofrece los que parecen de seguimiento, o escribes tú el tuyo. Con el que elijas arma la **tabla de equivalencias** (qué herramienta ve, crea, mueve, comenta, bloquea y agrega o renombra subtareas), anota lo que tu tracker hace solo (si marcar subtareas mueve la tarjeta y a dónde, si hay repositorio ligado) y te lo pregunta si no lo sabe, la prueba solo leyendo, te la enseña, busca el proyecto y guarda su clave. Si no tienes ninguno, o prefieres no usarlo, crea el **tablero local** dentro del repo y te pregunta el prefijo de las ramas. |
 | **3 · ¿Dónde está el plan?** | Busca `PLAN.md`, `ROADMAP.md`, `docs/plan*`… Cuenta como plan: épicas con alcance y orden. Si no hay, **no lo improvisa**: te manda a aterrizar la idea o a planear primero. |
 | **4 · Lo que el plan necesita saber** | Lo busca en el repo y te lo confirma en bloque: quién es el **dueño** y cómo se le avisa, el registro de defectos, las reglas del repo, el **CI local en un comando**, la rama principal, el ambiente de verificación, cómo se levanta y apaga el entorno local, el **canal de prueba** permitido (tu teléfono o correo, o «no hay envíos»), el alcance vigente y las **reglas que no se negocian**. |
 | **5 · Escribir la configuración** | **Te lo enseña antes de escribirlo.** Crea `.claude/capitan.md` y `docs/capitan/` con el relevo, las decisiones y los aprendizajes. No hace commit: eso lo decides tú. |
@@ -126,37 +126,63 @@ actividades que ya cerró, no con la estimación del tracker.
 
 ### Cómo atiende cada actividad
 
-16 pasos en cuatro tramos. Cada tramo termina en una **puerta**: si no se
-cumple, no se avanza.
+16 pasos en cuatro tramos. Cada paso tiene su **puerta**: si no se cumple, el
+paso no se marca y no se avanza. Los 16 viven como **checklist** en la tarjeta
+de la actividad (abajo).
 
 <p align="center"><img src="docs/assets/actividad.svg" alt="Los 16 pasos de una actividad, en cuatro tramos" width="100%"></p>
 
 <details>
 <summary><b>Los 16 pasos, uno por uno</b></summary>
 
-| # | Paso | Cómo | Puerta |
+| # | Paso | Cómo | Puerta: cuándo se puede marcar |
 |---|---|---|---|
 | 1 | **Rama propia** | Una actividad = una rama, desde la principal al día | Nada de PRs apilados |
-| 2 | En curso | La tarjeta se mueve solo a la columna de al lado | — |
+| 2 | **En curso y checklist** | La tarjeta se mueve solo a la columna de al lado y recibe el checklist del ciclo | Tarjeta en En curso, checklist creado y el paso 1 marcado |
 | 3 | **Plan** | Problema, archivos, decisiones con alternativas, riesgos, orden y cómo sabrá que quedó | Sin plan escrito no hay código |
-| 4 | **Crítica** y **seguridad del plan** | Dos agentes en paralelo | Cada punto se corrige o se justifica por escrito, antes del código |
-| 5 | **Plan de pruebas** | Un agente que solo conoce los criterios | — |
+| 4 | **Crítica** y **seguridad del plan** | Dos agentes en paralelo | Cada punto se corrige o se justifica por escrito, antes del código; lo que cambie del plan entra a la lista de desvíos |
+| 5 | **Plan de pruebas** | Un agente que solo conoce los criterios; no arranca hasta cerrar el 4 | Plan escrito, con adversariales y lo que debe fallar hoy |
 | 6 | **Si es bug, reproducirlo** | Un test que falla hoy, con la salida pegada | Sin reproducción no hay arreglo |
-| 7 | **Implementar** | Con las convenciones del repo y una lista de desvíos respecto al plan | Reglas del repo intactas |
-| 8 | **UI** | Medida en el navegador: emergentes abiertos, foco, accesibilidad | — |
-| 9 | **Ajustar las pruebas** | Si hubo desvíos, el agente de pruebas los recibe | — |
+| 7 | **Implementar** | Con las convenciones del repo y una lista de desvíos respecto al plan (incluye lo que cambió la crítica) | Reglas del repo intactas |
+| 8 | **UI** | Con el design system y la puerta visual que diga la config | Medida en el navegador, no leída en el código: emergentes abiertos, foco y accesibilidad |
+| 9 | **Ajustar las pruebas** | Si la crítica cambió el plan o hubo desvíos, el agente de pruebas los recibe | El plan de pruebas cubre cada desvío; sin ninguno, «no aplica» |
 | 10 | **Ejecutar las pruebas** | Tests y recorridos E2E con captura de cada paso, claro/oscuro y dos anchos | Verde con el cambio **y rojo sin él** |
 | 11 | **Seguridad del diff** | En **toda** actividad | Cada hallazgo se cierra o se justifica |
 | 12 | **Verificador** | CI local y puerta visual, con evidencia ejecutada | Todo verde o no se sube |
 | 13 | **Entregar** | Commits con la clave, merge `--no-ff` a la rama de sesión | Nunca a la principal, nunca squash |
-| 14 | **Documentar en el tracker** | Subtareas, comentario de cierre, a Revisión de código | — |
-| 15 | **Hallazgos** | Al registro de defectos, con la solución recomendada completa | — |
-| 16 | **Relevo** | Reescribe `estado.md` y anota todo para el reporte | Al día **antes** de tomar la siguiente |
+| 14 | **Hallazgos** | Al registro de defectos, con la solución recomendada completa | — |
+| 15 | **Relevo** | Reescribe `estado.md` y anota todo para el reporte | Al día **antes** de documentar y de tomar la siguiente |
+| 16 | **Documentar en el tracker** | Revisa el checklist completo, comentario de cierre y a Revisión de código | Pasos 1–15 cerrados y el comentario publicado. Siempre es lo último |
 
-Una actividad chica (solo textos o estilos) puede saltarse la crítica, pero
-nunca las pruebas ni la seguridad del diff.
+Una actividad chica (solo textos o estilos) cierra la crítica como «no aplica:
+actividad chica», pero nunca se salta las pruebas ni la seguridad del diff.
 
 </details>
+
+### El checklist del ciclo
+
+Al tomar una actividad, Claude le agrega a la tarjeta un checklist con los 16
+pasos («Ciclo 4 · Crítica + seguridad del plan»), separados de las subtareas
+propias del trabajo. Mientras la actividad corre, cualquiera que mire el
+tracker ve en qué paso va y cuál falta.
+
+- **Cada paso se marca en el momento**, con su evidencia: el agente y su
+  veredicto, el commit, el CI, la rama.
+- **Lo que no aplica se dice**: «no aplica: es mejora, no bug». Nunca se borra,
+  nunca se deja abierto y nunca se marca como hecho.
+- **Lo que se salta con tu permiso** queda como «omitido», con quién lo
+  permitió y por qué. Sin tu permiso no se salta nada.
+- **El checklist manda el orden.** Un paso no empieza sin cerrar el anterior,
+  la puerta es la condición para marcarlo, y ni la prisa ni el uso de la
+  cuenta justifican saltarse uno. Si hay que parar, para con el checklist al
+  día, y la siguiente conversación retoma en el primer paso abierto.
+- **Documentar es siempre lo último** (paso 16). Si tu tracker mueve la
+  tarjeta solo al completar las subtareas, eso coincide con el paso a Revisión
+  de código. Claude nunca cuenta con ese movimiento: después de marcar revisa
+  la columna y la corrige si hace falta.
+
+Con el tablero local, `tablero.py` lo hace cumplir: no marca un paso con uno
+anterior abierto y no pasa la tarjeta a Revisión de código con pasos abiertos.
 
 ---
 
@@ -280,7 +306,7 @@ Cada actividad deja rastro en cuatro lugares, en el momento, no al final:
 | Dónde | Qué queda |
 |---|---|
 | **Los commits** | Cada uno cita la clave de la actividad, y el merge a la rama de sesión dice `Merge <clave> …` |
-| **La tarjeta del tracker** | Subtareas marcadas, el **comentario de cierre** y la tarjeta en Revisión de código |
+| **La tarjeta del tracker** | El **checklist del ciclo** marcado paso a paso con su evidencia, el **comentario de cierre** y la tarjeta en Revisión de código |
 | **El registro de defectos** | Cada hallazgo con qué pasa, dónde (`archivo:línea`), evidencia, el test que lo reproduce y la **solución recomendada completa** |
 | **`decisiones.md`** | Lo que decidiste durante la actividad, con tus palabras, fecha y porqué |
 
@@ -297,6 +323,7 @@ Seguridad: <veredicto>
 Crítica: <hallazgos del crítico y qué se hizo con cada uno>
 NO se probó: <lo honesto>
 Velocidad: <inicio → cierre> · uso gastado · estimado vs real
+Ciclo: <16/16 cerrados> · no aplica: <cuáles y por qué> · omitidos: <cuáles, quién lo permitió>
 Para el dueño: <merge · recorrido · decisión>
 ```
 
@@ -543,6 +570,7 @@ skills/configurar/     /capitan:configurar
 skills/trabajar/       /capitan:trabajar — el método completo
 hooks/hooks.json       qué candado corre en qué momento
 scripts/               candados, tablero, medidor, reporte y sus revisores
+tests/                 pruebas del tablero (python3 -m unittest discover -s tests)
 plantillas/            el brief de agentes y la página del reporte
 docs/assets/           el banner y los diagramas de este README
 ```
