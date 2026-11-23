@@ -1,5 +1,81 @@
 # Cambios
 
+## 0.9.0 — El checklist mecánico
+
+Con un tracker por MCP, el checklist del ciclo era una regla de palabra. Los
+hooks no pueden leer las subtareas del tracker, así que el agente podía
+saltarse un paso o marcarlo sin evidencia y nada lo detenía. El dueño pidió
+que no se le pase registrar nada y que eso no dependa de la memoria del
+agente.
+
+**Qué cambia**
+
+- **`ciclo.py` lleva el checklist, con cualquier tracker.** Vive junto al
+  repo, en `<git común>/capitan/ciclo/ACT-0xx.json`: lo comparten los worktrees
+  y no ensucia el árbol que `ci_local.py` exige limpio. Solo lo escribe el
+  script. El tracker es un espejo: `ciclo.py` imprime el título exacto para
+  marcar y renombrar la subtarea. Al cerrar el paso 16, la copia
+  `docs/capitan/ciclo/ACT-0xx.json` entra al commit del relevo y viaja en el
+  PR. En cada punto limpio también se exporta esa copia, en el commit con el
+  que Capitán se detiene. Así una actividad a medias se retoma en otra
+  máquina: si no está el vivo, `ciclo.py` lo toma de la copia.
+- **Evidencia mínima por paso, revisada por el script.**
+  - 1: una rama que existe.
+  - 2 y 15: la hora y el uso del medidor (de inicio y de cierre), que pone el
+    script. El 15 imprime la medición para pegarla en `estado.md`, y el 16
+    exige que esté pegada.
+  - 5 y 9: la ruta del plan de pruebas, con el archivo existente.
+  - 6: la salida roja.
+  - 7: un commit de la rama.
+  - 10 y 11: «revisó <sha>», sin código después.
+  - 12: la corrida verde de `ci_local.py` sobre la punta, de la que copia el
+    conteo literal.
+  - 13: el merge a la rama de sesión.
+  - 15: `estado.md` reescrito después del merge.
+
+  Además:
+  - solo el 4, 6, 8, 9 y 14 pueden ser «no aplica»;
+  - un paso omitido lleva el permiso del dueño con fecha;
+  - el 10, el 11 y el 12 se vuelven a marcar cuando revisan un commit más
+    nuevo, y así queda registrada la revisión cruzada de un arreglo;
+  - un paso mal marcado se reabre con `ciclo.py reabrir`, solo con el permiso
+    escrito del dueño, y lo anterior queda guardado.
+- **Los hooks leen el checklist en cada puerta.**
+  - **Al lanzar un agente:** el encargo dice su paso («Paso 10 de ACT-012»,
+    o «Fuera del ciclo: <motivo>»), y se bloquea si los anteriores siguen
+    abiertos, salvo su par en paralelo.
+  - **En el merge a la rama de sesión:** del 1 al 12 cerrados, y el 10, el 11
+    y el 12 sobre el último commit de código de la rama.
+  - **Al pasar a Revisión de código con tracker MCP:** del 1 al 15 cerrados.
+  - **En `gh pr create`:** cada actividad de la sesión 16/16, con su copia en
+    el commit, y el CI completo sobre ese commit.
+
+  Los candados leen el comando de verdad, no el texto. Un mensaje de commit o
+  un heredoc que diga `gh pr create` no los dispara, y `git -C <ruta>` o
+  `cd <ruta> &&` no los esquivan. La actividad de una rama se reconoce por la
+  rama registrada en el paso 1 de su checklist.
+
+  Un checklist que no existe bloquea. Uno que no se puede leer avisa y no
+  bloquea.
+- **CI por área.** `ci_local.py --areas` corre solo las suites de las áreas
+  que toca la rama, según la tabla `## CI por área` de la config. Si un
+  archivo no cae en ningún área, corre todo; lo que está en `docs/` no cuenta.
+  El CI completo corre una sola vez, sobre la rama de sesión antes del PR. El
+  registro del CI pasa al directorio común de git, el mismo para todos los
+  worktrees.
+- **Tablero local.** `tablero.py ciclo` y `tablero.py paso` usan `ciclo.py`,
+  así que hay una sola implementación, y las subtareas del tablero son su
+  espejo. Para una actividad con checklist de antes de la 0.9.0,
+  `tablero.py ciclo` lo pasa a `ciclo.py` tal como estaba.
+
+**Proyectos ya configurados:**
+- Para el CI por área, corre el Paso 4 de `/capitan:configurar`. Sin la
+  tabla, el paso 12 corre el CI completo.
+- Las actividades en curso necesitan su checklist: `ciclo.py crear ACT-0xx`.
+  Cierra los pasos que ya pasaron con su evidencia, o como omitidos con el
+  permiso escrito del dueño. Sin checklist, los candados no las dejan
+  mergear ni pasar a Revisión.
+
 ## 0.8.2 — Revisores en paralelo
 
 Una actividad chica (un solo script) tardó 61 minutos medidos. Unos 27 se
