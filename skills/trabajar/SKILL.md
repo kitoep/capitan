@@ -128,7 +128,7 @@ con cada comando; `tablero.py html` la rehace a mano):
 - **Consumo = solo el de las sesiones del proyecto**, desde el medidor por
   sesión (§Colchón de uso usa el de la cuenta, que es otra cosa). Costo
   exacto; % semanal aproximado porque incluye lo que se haga en paralelo.
-- **Temas** de admin-kit (Esmeralda, Índigo, Naranja) en claro, oscuro o
+- **Temas** (Esmeralda, Índigo, Naranja) en claro, oscuro o
   sistema; la elección vive en el navegador de quien mira.
 - **Migrar de otro tracker:** `tablero.py crear … --importada --columna <c>`
   hace nacer la actividad en su columna, marcada como importada y sin

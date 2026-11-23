@@ -433,7 +433,7 @@ def fragmento(doc: str) -> str:
     return head + cuerpo.group(1)
 
 
-ESTADO_TONO = {  # el color señala estado, no adorna (admin-kit)
+ESTADO_TONO = {  # el color señala estado, no adorna
     "backlog": "neutro", "por_hacer": "neutro", "en_curso": "info", "revision": "info",
     "pruebas": "info", "por_desplegar": "warn", "listo": "success",
 }
@@ -696,7 +696,7 @@ def render(t: dict) -> str:
     )
 
 
-# Temas tomados de las semillas de admin-kit (Esmeralda, Índigo corporativo, Naranja cálido).
+# Temas de la página (Esmeralda, Índigo corporativo, Naranja cálido).
 _TEMAS = {
     "esmeralda": {
         "claro": dict(canvas="#F3F5F7", card="#FFFFFF", well="#F7F9FA", control="#EEF1F3", line="#E8ECEF", line_2="#858B90",
