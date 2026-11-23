@@ -16,7 +16,11 @@ Uso (desde la raíz del proyecto):
                                               columna, sin movimientos ni tiempos inventados
   tablero.py mover ACT-001 <columna>                        backlog|por_hacer|en_curso|revision|pruebas|por_desplegar|listo
   tablero.py comentar ACT-001 "<texto>"
-  tablero.py subtarea ACT-001 <n> [--hecha|--pendiente|--titulo "..."]
+  tablero.py subtarea ACT-001 <n> [--hecha|--pendiente|--titulo "..."]   (subtareas propias del trabajo)
+  tablero.py ciclo --listar                                 los pasos del ciclo, leídos de skills/trabajar/SKILL.md
+  tablero.py ciclo ACT-001                                  agrega a la actividad el checklist del ciclo
+  tablero.py paso ACT-001 <n> --hecho "<evidencia>" | --no-aplica "<por qué>" | --omitido "<quién lo permitió y por qué>"
+        cierra un paso del ciclo; se niega si uno anterior sigue abierto
   tablero.py fechas ACT-001 --inicia AAAA-MM-DD --termina AAAA-MM-DD   (solo actividades nuevas)
   tablero.py criterios ACT-001 --criterio "..."...          reemplaza los criterios (deja bitácora)
   tablero.py bloquear ACT-001 "<motivo>" | desbloquear ACT-001
@@ -51,6 +55,37 @@ NOMBRES = {
     "backlog": "Backlog", "por_hacer": "Por hacer", "en_curso": "En curso", "revision": "Revisión de código",
     "pruebas": "Pruebas funcionales", "por_desplegar": "Por desplegar", "listo": "Listo",
 }
+
+
+CICLO_PREFIJO = "Ciclo"
+SKILL_TRABAJAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills", "trabajar", "SKILL.md")
+ESTADOS_PASO = {"hecha": "hecho", "no_aplica": "no aplica", "omitida": "omitido"}
+
+
+def pasos_del_ciclo(ruta: str = SKILL_TRABAJAR) -> list[tuple[int, str]]:
+    """Los pasos de «El ciclo de una actividad», leídos de su tabla en el SKILL (la única fuente)."""
+    try:
+        texto = open(ruta, encoding="utf-8").read()
+    except OSError:
+        sys.exit(f"No encuentro el SKILL del ciclo en {ruta}")
+    m = re.search(r"^## El ciclo de una actividad\s*$(.*?)^## ", texto, re.M | re.S)
+    if not m:
+        sys.exit("El SKILL no trae la sección «## El ciclo de una actividad».")
+    pasos = []
+    for fila in m.group(1).splitlines():
+        r = re.match(r"^\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|", fila)
+        if r:
+            t = re.sub(r"\*\*|`", "", r.group(2))
+            t = re.sub(r"\s*\([^)]*\)", "", t).strip()
+            pasos.append((int(r.group(1)), t[:1].upper() + t[1:]))
+    if [n for n, _ in pasos] != list(range(1, len(pasos) + 1)) or not pasos:
+        sys.exit("La tabla del ciclo en el SKILL no está numerada 1..N sin huecos.")
+    return pasos
+
+
+def cerrada(s: dict) -> bool:
+    """Una subtarea cuenta como cerrada si se hizo, no aplica o se omitió con permiso."""
+    return s.get("estado", "hecha" if s["hecha"] else "pendiente") != "pendiente"
 
 
 def ahora() -> str:
@@ -177,6 +212,10 @@ def cmd_mover(args) -> None:
         sys.exit(f"Solo se mueve a la columna contigua ({NOMBRES[a['columna']]} → ?). Un retroceso cuenta como retrabajo.")
     if a.get("bloqueada") and a_ > de:
         sys.exit(f"{a['clave']} está bloqueada: {a['bloqueada']}")
+    if args.columna == "revision" and a_ > de:
+        abiertos = [str(x["ciclo"]) for x in a["subtareas"] if x.get("ciclo") and not cerrada(x)]
+        if abiertos:
+            sys.exit(f"{a['clave']} tiene pasos del ciclo abiertos ({', '.join(abiertos)}): ciérralos antes de pasarla a Revisión de código.")
     texto = f"{NOMBRES[a['columna']]} → {NOMBRES[args.columna]}" + (" (retrabajo)" if a_ < de else "")
     a["columna"] = args.columna
     bitacora(a, texto)
@@ -224,6 +263,8 @@ def cmd_subtarea(args) -> None:
     if not 1 <= args.n <= len(a["subtareas"]):
         sys.exit(f"{a['clave']} tiene {len(a['subtareas'])} subtareas.")
     s = a["subtareas"][args.n - 1]
+    if s.get("ciclo"):
+        sys.exit(f"La subtarea {args.n} es el paso {s['ciclo']} del ciclo: se cierra con `tablero.py paso {a['clave']} {s['ciclo']} …`.")
     if args.titulo:
         bitacora(a, f"subtarea {args.n} renombrada: «{s['titulo']}» → «{args.titulo}»")
         s["titulo"] = args.titulo
@@ -231,7 +272,48 @@ def cmd_subtarea(args) -> None:
         s["hecha"] = bool(args.hecha)
         bitacora(a, f"subtarea {args.n} {'hecha' if s['hecha'] else 'pendiente'}: {s['titulo']}")
     guardar(t)
-    print(f"{a['clave']} · {sum(x['hecha'] for x in a['subtareas'])}/{len(a['subtareas'])} subtareas")
+    print(f"{a['clave']} · {sum(cerrada(x) for x in a['subtareas'])}/{len(a['subtareas'])} subtareas")
+
+
+def cmd_ciclo(args) -> None:
+    pasos = pasos_del_ciclo()
+    if args.listar or not args.clave:
+        for n, tit in pasos:
+            print(f"{CICLO_PREFIJO} {n} · {tit}")
+        return
+    t = cargar()
+    a = actividad(t, args.clave)
+    if any(s.get("ciclo") for s in a["subtareas"]):
+        sys.exit(f"{a['clave']} ya tiene el checklist del ciclo.")
+    for n, tit in pasos:
+        a["subtareas"].append({"titulo": f"{CICLO_PREFIJO} {n} · {tit}", "hecha": False, "ciclo": n, "estado": "pendiente"})
+    bitacora(a, f"checklist del ciclo agregado ({len(pasos)} pasos)")
+    guardar(t)
+    print(f"{a['clave']} · checklist del ciclo: {len(pasos)} pasos")
+
+
+def cmd_paso(args) -> None:
+    t = cargar()
+    a = actividad(t, args.clave)
+    ciclo = sorted((s for s in a["subtareas"] if s.get("ciclo")), key=lambda s: s["ciclo"])
+    if not ciclo:
+        sys.exit(f"{a['clave']} no tiene el checklist del ciclo: `tablero.py ciclo {a['clave']}`.")
+    s = next((x for x in ciclo if x["ciclo"] == args.n), None)
+    if not s:
+        sys.exit(f"El ciclo de {a['clave']} va del 1 al {ciclo[-1]['ciclo']}.")
+    if cerrada(s):
+        sys.exit(f"El paso {args.n} ya está cerrado ({ESTADOS_PASO[s['estado']]}: {s.get('nota', '')}).")
+    abiertos = [x["ciclo"] for x in ciclo if x["ciclo"] < args.n and not cerrada(x)]
+    if abiertos:
+        sys.exit(f"Antes del paso {args.n} cierra los anteriores: {', '.join(map(str, abiertos))}. El checklist manda el orden.")
+    estado, nota = (("hecha", args.hecho) if args.hecho is not None else
+                    ("no_aplica", args.no_aplica) if args.no_aplica is not None else ("omitida", args.omitido))
+    if not (nota or "").strip():
+        sys.exit("Falta el texto: la evidencia, el motivo de «no aplica» o quién permitió omitirlo y por qué.")
+    s.update(estado=estado, nota=nota.strip(), hecha=estado == "hecha", cuando=ahora())
+    bitacora(a, f"paso {args.n} {ESTADOS_PASO[estado]}: {s['titulo']} — {s['nota']}")
+    guardar(t)
+    print(f"{a['clave']} · paso {args.n} {ESTADOS_PASO[estado]} · ciclo {sum(cerrada(x) for x in ciclo)}/{len(ciclo)}")
 
 
 def cmd_fechas(args) -> None:
@@ -447,6 +529,17 @@ def _pct(x) -> str:
     return "—" if x is None else f"{x:.1f}%"
 
 
+def subtarea_html(s: dict) -> str:
+    e = html.escape
+    estado = s.get("estado", "hecha" if s["hecha"] else "pendiente")
+    marca = {"hecha": "si", "no_aplica": "na", "omitida": "om"}.get(estado, "")
+    nota = ""
+    if s.get("nota"):
+        nota = f"<span class='nota'>{e(ESTADOS_PASO.get(estado, ''))}: {e(s['nota'])}</span>"
+    return (f"<li class='{'ciclo' if s.get('ciclo') else ''}'><span class='check {marca}' title='{e(estado)}'></span>"
+            f"<span>{e(s['titulo'])}{nota}</span></li>")
+
+
 def render(t: dict) -> str:
     e = lambda s: html.escape(str(s if s is not None else ""))
     epicas = {x["clave"]: x["nombre"] for x in t["epicas"]}
@@ -504,7 +597,7 @@ def render(t: dict) -> str:
         tarjetas = []
         for a in [a for a in acts if a["columna"] == c]:
             k, mk = a["clave"], m[a["clave"]]
-            hechas = sum(s["hecha"] for s in a["subtareas"])
+            hechas = sum(cerrada(s) for s in a["subtareas"])
             marcas = ""
             if vencida(a):
                 marcas += "<span class='pill danger'>vencida</span>"
@@ -529,8 +622,7 @@ def render(t: dict) -> str:
             if a["criterios"]:
                 secc.append("<h4>Criterios</h4><ul>" + "".join(f"<li>{e(x)}</li>" for x in a["criterios"]) + "</ul>")
             if a["subtareas"]:
-                secc.append("<h4>Subtareas</h4><ul class='sub'>" + "".join(
-                    f"<li><span class='check {'si' if s['hecha'] else ''}'></span>{e(s['titulo'])}</li>" for s in a["subtareas"]) + "</ul>")
+                secc.append("<h4>Subtareas</h4><ul class='sub'>" + "".join(subtarea_html(s) for s in a["subtareas"]) + "</ul>")
             if a.get("bloqueada"):
                 secc.append(f"<p class='aviso danger'><b>Bloqueo:</b> {e(a['bloqueada'])}</p>")
             if a["depende_de"]:
@@ -573,7 +665,7 @@ def render(t: dict) -> str:
     filas = []
     for a in acts:
         k, mk = a["clave"], m[a["clave"]]
-        hechas = sum(s["hecha"] for s in a["subtareas"])
+        hechas = sum(cerrada(s) for s in a["subtareas"])
         extra = (" · bloqueada" if a.get("bloqueada") else "") + (" · vencida" if vencida(a) else "")
         celdas = [
             (f"{int(k.split('-')[1]):05d}", e(k), "mono"),
@@ -826,6 +918,9 @@ input::placeholder{color:var(--ink-3)}
 .sub li{display:flex;gap:8px;align-items:flex-start;margin:3px 0}
 .check{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line-2);flex:none;margin-top:3px}
 .check.si{background:var(--brand);border-color:var(--brand)}
+.check.na{border-style:dashed;background:linear-gradient(to top right,transparent 45%,var(--line-2) 45%,var(--line-2) 55%,transparent 55%)}
+.check.om{border-color:var(--ink-3);background:var(--ink-3)}
+.sub .nota{display:block;font-size:11.5px;color:var(--ink-3)}
 .aviso{padding:8px 10px;border-radius:var(--r-ctl)}
 .aviso.danger{background:var(--danger-soft);color:var(--danger)}
 .com{margin:6px 0;color:var(--ink-2)}
@@ -919,6 +1014,10 @@ def main() -> None:
     x = s.add_parser("comentar"); x.add_argument("clave"); x.add_argument("texto"); x.set_defaults(f=cmd_comentar)
     x = s.add_parser("subtarea"); x.add_argument("clave"); x.add_argument("n", type=int); g = x.add_mutually_exclusive_group()
     g.add_argument("--hecha", action="store_true"); g.add_argument("--pendiente", action="store_true"); x.add_argument("--titulo"); x.set_defaults(f=cmd_subtarea)
+    x = s.add_parser("ciclo"); x.add_argument("clave", nargs="?"); x.add_argument("--listar", action="store_true"); x.set_defaults(f=cmd_ciclo)
+    x = s.add_parser("paso"); x.add_argument("clave"); x.add_argument("n", type=int); g = x.add_mutually_exclusive_group(required=True)
+    g.add_argument("--hecho", metavar="EVIDENCIA"); g.add_argument("--no-aplica", dest="no_aplica", metavar="POR_QUE")
+    g.add_argument("--omitido", metavar="PERMISO"); x.set_defaults(f=cmd_paso)
     x = s.add_parser("fechas"); x.add_argument("clave"); x.add_argument("--inicia", required=True); x.add_argument("--termina", required=True)
     x.add_argument("--forzar", action="store_true"); x.set_defaults(f=cmd_fechas)
     x = s.add_parser("criterios"); x.add_argument("clave"); x.add_argument("--criterio", action="append", required=True); x.set_defaults(f=cmd_criterios)
