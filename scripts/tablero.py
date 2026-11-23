@@ -83,6 +83,19 @@ def pasos_del_ciclo(ruta: str = SKILL_TRABAJAR) -> list[tuple[int, str]]:
     return pasos
 
 
+def pares_en_paralelo(ruta: str = SKILL_TRABAJAR) -> dict[int, int]:
+    """Los pasos que corren a la vez, de la línea «**En paralelo:** 4 y 5 · 10 y 11» del SKILL: {4: 5, 5: 4, …}."""
+    try:
+        texto = open(ruta, encoding="utf-8").read()
+    except OSError:
+        return {}
+    m = re.search(r"\*\*En paralelo:\*\*([^\n]*)", texto)
+    pares = {}
+    for x, y in re.findall(r"(\d+)\s+y\s+(\d+)", m.group(1) if m else ""):
+        pares[int(x)], pares[int(y)] = int(y), int(x)
+    return pares
+
+
 def cerrada(s: dict) -> bool:
     """Una subtarea cuenta como cerrada si se hizo, no aplica o se omitió con permiso."""
     return s.get("estado", "hecha" if s["hecha"] else "pendiente") != "pendiente"
@@ -303,7 +316,8 @@ def cmd_paso(args) -> None:
         sys.exit(f"El ciclo de {a['clave']} va del 1 al {ciclo[-1]['ciclo']}.")
     if cerrada(s):
         sys.exit(f"El paso {args.n} ya está cerrado ({ESTADOS_PASO[s['estado']]}: {s.get('nota', '')}).")
-    abiertos = [x["ciclo"] for x in ciclo if x["ciclo"] < args.n and not cerrada(x)]
+    pareja = pares_en_paralelo().get(args.n)  # su par corre a la vez: puede seguir abierto
+    abiertos = [x["ciclo"] for x in ciclo if x["ciclo"] < args.n and x["ciclo"] != pareja and not cerrada(x)]
     if abiertos:
         sys.exit(f"Antes del paso {args.n} cierra los anteriores: {', '.join(map(str, abiertos))}. El checklist manda el orden.")
     estado, nota = (("hecha", args.hecho) if args.hecho is not None else

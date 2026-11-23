@@ -200,13 +200,13 @@ def agentes():
          ["Revisa el plan sin oír la defensa:", "nadie lo convence de que está bien."]),
         ("Seguridad del plan", "OPUS", "Paso 4 · si toca datos o accesos",
          ["Encuentra el riesgo cuando aún es", "papel, no cuando ya es código."]),
-        ("Planeador de pruebas", "OPUS", "Paso 5 · antes del código",
+        ("Planeador de pruebas", "OPUS", "Paso 5 · a la vez que la crítica",
          ["Solo conoce lo que se pidió: sus", "pruebas no heredan los huecos."]),
         ("Ajuste de pruebas", "OPUS", "Paso 9 · si hubo desvíos",
          ["Sabe qué cambió del plan, no cómo:", "sigue midiendo lo que se pidió."]),
-        ("Probador", "SONNET", "Paso 10 · tests y recorridos E2E",
+        ("Probador", "SONNET", "Paso 10 · a la vez que seguridad",
          ["Cada prueba se ve roja sin el cambio", "y verde con él; si no, no cuenta."]),
-        ("Seguridad del diff", "OPUS", "Paso 11 · en toda actividad",
+        ("Seguridad del diff", "OPUS", "Paso 11 · siempre, junto al probador",
          ["Lee solo el cambio, línea por línea,", "sin la historia de cómo se hizo."]),
     ]
     cw, ch, g, m = 420, 186, 20, 20

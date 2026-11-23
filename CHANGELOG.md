@@ -1,5 +1,38 @@
 # Cambios
 
+## 0.8.2 — Revisores en paralelo
+
+Una actividad chica (un solo script) tardó 61 minutos medidos. Unos 27 se
+fueron en agentes esperándose uno a otro. Las revisiones sí valieron: dieron
+con 7 huecos reales. Lo que sobraba era la espera, no las revisiones.
+
+**Qué cambia**
+
+- **Los revisores que no dependen uno del otro corren a la vez.** Hay dos
+  pares:
+  - crítica y plan de pruebas (4 y 5): el 5 solo recibe los criterios, no el
+    plan, así que no tiene que esperar;
+  - probador y seguridad del diff (10 y 11), sobre el mismo commit.
+
+  Los dos de un par se lanzan en el mismo mensaje y cualquiera puede cerrarse
+  primero. El paso que sigue al par no empieza hasta cerrar los dos.
+- **Si uno provoca un cambio, el otro lo revisa antes de cerrar su paso.**
+  - Si la crítica cambia el alcance o los criterios, el cambio llega al plan
+    de pruebas por el paso 9.
+  - Si el probador pide un arreglo, seguridad revisa solo el diff de ese
+    arreglo.
+  - Si seguridad pide un arreglo, el probador corre sus casos sobre él.
+
+  La evidencia del 10 y del 11 dice qué commit revisó cada uno.
+- **Tablero local.** `tablero.py paso` lee los pares de la línea
+  «**En paralelo:**» del SKILL y deja cerrar un paso con su par abierto. Fuera
+  de los pares, el orden sigue estricto.
+- **El candado del tracker ya no se apaga en silencio.** Si `## Tracker` no
+  trae «Mover» y «Revisión de código» en la forma fija (las configs anteriores
+  a la 0.8.1), el candado no sabe qué revisar. Ahora, al abrir la sesión,
+  Capitán le avisa al dueño que está apagado y le pide correr el Paso 2 de
+  `/capitan:configurar`.
+
 ## 0.8.1 — Candados donde el checklist no alcanzaba
 
 La 0.8.0 hizo visible el ciclo, pero con un tracker por MCP el checklist

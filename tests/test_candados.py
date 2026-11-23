@@ -17,6 +17,7 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = os.path.join(RAIZ, "scripts")
 sys.path.insert(0, SCRIPTS)
 from version_plugin import aviso_version  # noqa: E402
+from hook_tracker import aviso_config  # noqa: E402
 
 CONFIG = """# Capitán · mi-proyecto
 
@@ -146,6 +147,43 @@ class HookTracker(Repo):
         r = self.hook()
         self.assertEqual(r.returncode, 0)
         self.assertIn("Revisión de código", r.stdout)
+
+
+class CandadoApagado(Repo):
+    """Una config anterior a la forma fija apaga el candado: al abrir la sesión se dice."""
+
+    def inicio(self):
+        env = {**os.environ, "HOME": self.dir, "USERPROFILE": self.dir}
+        r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "hook_inicio.py")], input=json.dumps({"cwd": self.dir}),
+                           capture_output=True, text=True, env=env)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return json.loads(r.stdout)
+
+    def test_forma_fija_no_avisa(self):
+        self.assertIsNone(aviso_config(CONFIG.format(ci="true")))
+
+    def test_tablero_local_no_avisa(self):
+        self.assertIsNone(aviso_config("| Tracker | local |\n"))
+
+    def test_mover_sin_backticks_avisa(self):
+        a = aviso_config(CONFIG.format(ci="true").replace("`cambiar-columna`", "cambiar-columna"))
+        self.assertIn("APAGADO", a)
+        self.assertIn("«Mover»", a)
+        self.assertNotIn("Revisión de código»", a.split("no trae")[1].split("con la")[0])
+
+    def test_sin_revision_avisa(self):
+        a = aviso_config(CONFIG.format(ci="true").replace("| Revisión de código | `review` | Revisión |\n", ""))
+        self.assertIn("«Revisión de código»", a)
+
+    def test_hook_inicio_lo_dice_al_dueno(self):
+        self.escribir(".claude/capitan.md", CONFIG.format(ci="true").replace("`cambiar-columna`", "cambiar-columna"))
+        salida = self.inicio()
+        self.assertIn("APAGADO", salida["systemMessage"])
+        self.assertIn("AVISO PARA EL DUEÑO", salida["hookSpecificOutput"]["additionalContext"])
+
+    def test_hook_inicio_calla_con_la_forma_fija(self):
+        self.escribir(".claude/capitan.md", CONFIG.format(ci="true"))
+        self.assertNotIn("systemMessage", self.inicio())
 
 
 class CiLocal(Repo):

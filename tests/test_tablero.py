@@ -129,6 +129,38 @@ class Tablero(unittest.TestCase):
         self.assertIn("paso 1", self.falla("subtarea", "ACT-001", "2", "--hecha"))
         self.ok("subtarea", "ACT-001", "1", "--hecha")  # la propia del trabajo sí
 
+    # --- revisores en paralelo ---
+    def test_pares_en_paralelo_se_leen_del_skill(self):
+        sys.path.insert(0, os.path.dirname(TABLERO))
+        from tablero import pares_en_paralelo
+        self.assertEqual(pares_en_paralelo(SKILL), {4: 5, 5: 4, 10: 11, 11: 10})
+
+    def test_plan_de_pruebas_cierra_antes_que_la_critica(self):
+        self.ok("ciclo", "ACT-001")
+        self.cerrar_hasta(3)
+        self.ok("paso", "ACT-001", "5", "--hecho", "plan de pruebas: 9 casos, 4 adversariales")
+        self.assertIn("4", self.falla("paso", "ACT-001", "6", "--no-aplica", "es mejora"))
+        self.ok("paso", "ACT-001", "4", "--hecho", "crítica opus: 2 puntos corregidos")
+        self.ok("paso", "ACT-001", "6", "--no-aplica", "es mejora")
+
+    def test_el_par_no_salta_lo_anterior(self):
+        self.ok("ciclo", "ACT-001")
+        self.cerrar_hasta(2)
+        self.assertIn("3", self.falla("paso", "ACT-001", "5", "--hecho", "plan de pruebas"))
+
+    def test_seguridad_cierra_antes_que_el_probador(self):
+        self.ok("ciclo", "ACT-001")
+        self.cerrar_hasta(9)
+        self.ok("paso", "ACT-001", "11", "--hecho", "opus sobre abc123: sin hallazgos")
+        self.assertIn("10", self.falla("paso", "ACT-001", "12", "--hecho", "412 passed"))
+        self.ok("paso", "ACT-001", "10", "--hecho", "sonnet sobre abc123: 12 verdes, rojos sin el cambio")
+        self.ok("paso", "ACT-001", "12", "--hecho", "412 passed")
+
+    def test_fuera_de_un_par_el_orden_sigue_estricto(self):
+        self.ok("ciclo", "ACT-001")
+        self.cerrar_hasta(6)
+        self.assertIn("7", self.falla("paso", "ACT-001", "8", "--no-aplica", "sin UI"))
+
     # --- no aplica y omitido ---
     def test_no_aplica_cierra_sin_marcar_como_hecho(self):
         self.ok("ciclo", "ACT-001")
