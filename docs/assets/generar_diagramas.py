@@ -155,9 +155,9 @@ def actividad():
         ("Verificar", [("9", "Ajuste de las pruebas", ("OPUS", "agente")), ("10", "Pruebas y recorridos E2E", ("SONNET", "agente")),
                        ("11", "Seguridad del diff", ("OPUS", "agente")), ("12", "Verificador: CI local", None)],
          "Rojo sin el cambio, verde con él"),
-        ("Entregar", [("13", "Merge a la rama de sesión", ("JUEZ", "candado")), ("14", "Comentario en la tarjeta", None),
-                      ("15", "Hallazgos con su solución", None), ("16", "Relevo en estado.md", None)],
-         "Relevo al día antes de la siguiente"),
+        ("Entregar", [("13", "Merge a la rama de sesión", ("JUEZ", "candado")), ("14", "Hallazgos con su solución", None),
+                      ("15", "Relevo en estado.md", None), ("16", "Comentario en la tarjeta", None)],
+         "Documentar es siempre lo último"),
     ]
     cw, g, m = 415, 30, 20
     hh, sh, sg, ph = 54, 54, 8, 58
