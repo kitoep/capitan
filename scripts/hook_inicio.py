@@ -49,6 +49,16 @@ try:
 except Exception:
     _aviso = None
 
+# El candado del tracker MCP se apaga en silencio si `## Tracker` no trae su
+# forma fija (configs anteriores a la 0.8.1). Aquí se dice en voz alta.
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from hook_tracker import aviso_config
+    _apagado = aviso_config(open(os.path.join(cwd, ".claude", "capitan.md"), encoding="utf-8").read())
+except Exception:
+    _apagado = None
+_aviso = " ".join(a for a in (_apagado, _aviso) if a) or None
+
 intro = (
     "Este proyecto usa el método Capitán (plugin capitan). Antes de trabajar, "
     "lo que sigue es el relevo de la sesión anterior y las decisiones vigentes del dueño. "

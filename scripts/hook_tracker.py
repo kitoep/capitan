@@ -73,6 +73,21 @@ def linea_de(estado: str, clave: str) -> str | None:
     return None
 
 
+def aviso_config(texto: str) -> str | None:
+    """Si `## Tracker` existe pero no trae la forma que este candado lee, el candado
+    queda apagado sin hacer ruido: hook_inicio lo dice al abrir la sesión."""
+    sec = seccion_tracker(texto)
+    if sec is None:
+        return None  # tablero local: el candado es el de tablero.py
+    faltan = [f"«{n}»" for n in ("Mover", "Revisión de código") if not celda(sec, n)]
+    if not faltan:
+        return None
+    return ("el candado del tracker está APAGADO en este proyecto: la sección `## Tracker` de "
+            f".claude/capitan.md no trae {' ni '.join(faltan)} con la herramienta o el valor entre "
+            "backticks, así que nada revisa el relevo y la medición antes de pasar una tarjeta a "
+            "Revisión de código. Corre el Paso 2 de /capitan:configurar para dejarla en forma.")
+
+
 def bloquear(msg: str) -> None:
     print(msg, file=sys.stderr)
     sys.exit(2)

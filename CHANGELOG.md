@@ -27,6 +27,11 @@ con 7 huecos reales. Lo que sobraba era la espera, no las revisiones.
 - **Tablero local.** `tablero.py paso` lee los pares de la línea
   «**En paralelo:**» del SKILL y deja cerrar un paso con su par abierto. Fuera
   de los pares, el orden sigue estricto.
+- **El candado del tracker ya no se apaga en silencio.** Si `## Tracker` no
+  trae «Mover» y «Revisión de código» en la forma fija (las configs anteriores
+  a la 0.8.1), el candado no sabe qué revisar. Ahora, al abrir la sesión,
+  Capitán le avisa al dueño que está apagado y le pide correr el Paso 2 de
+  `/capitan:configurar`.
 
 ## 0.8.1 — Candados donde el checklist no alcanzaba
 
