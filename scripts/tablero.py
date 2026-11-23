@@ -19,8 +19,8 @@ Uso (desde la raíz del proyecto):
   tablero.py subtarea ACT-001 <n> [--hecha|--pendiente|--titulo "..."]   (subtareas propias del trabajo)
   tablero.py ciclo --listar                                 los pasos del ciclo, leídos de skills/trabajar/SKILL.md
   tablero.py ciclo ACT-001                                  agrega a la actividad el checklist del ciclo
-  tablero.py paso ACT-001 <n> --hecho "<evidencia>" | --no-aplica "<por qué>" | --omitido "<quién lo permitió y por qué>"
-        cierra un paso del ciclo; se niega si uno anterior sigue abierto
+  tablero.py paso ACT-001 <n> --hecho "<evidencia>" | --no-aplica "<por qué>" | --omitido "permiso de <dueño>, AAAA-MM-DD: <por qué>"
+        cierra un paso del ciclo con ciclo.py (que valida la evidencia y el orden) y pinta su espejo
   tablero.py fechas ACT-001 --inicia AAAA-MM-DD --termina AAAA-MM-DD   (solo actividades nuevas)
   tablero.py criterios ACT-001 --criterio "..."...          reemplaza los criterios (deja bitácora)
   tablero.py bloquear ACT-001 "<motivo>" | desbloquear ACT-001
@@ -57,43 +57,20 @@ NOMBRES = {
 }
 
 
-CICLO_PREFIJO = "Ciclo"
-SKILL_TRABAJAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills", "trabajar", "SKILL.md")
-ESTADOS_PASO = {"hecha": "hecho", "no_aplica": "no aplica", "omitida": "omitido"}
+# El checklist del ciclo vive en ciclo.py (una sola implementación para cualquier
+# tracker); el tablero guarda su espejo en las subtareas para pintarlo.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ciclo as _ciclo  # noqa: E402
+from ciclo import CICLO_PREFIJO  # noqa: E402
+
+ESTADOS_PASO = _ciclo.ESTADOS
 
 
-def pasos_del_ciclo(ruta: str = SKILL_TRABAJAR) -> list[tuple[int, str]]:
-    """Los pasos de «El ciclo de una actividad», leídos de su tabla en el SKILL (la única fuente)."""
+def pasos_del_ciclo() -> list[tuple[int, str]]:
     try:
-        texto = open(ruta, encoding="utf-8").read()
-    except OSError:
-        sys.exit(f"No encuentro el SKILL del ciclo en {ruta}")
-    m = re.search(r"^## El ciclo de una actividad\s*$(.*?)^## ", texto, re.M | re.S)
-    if not m:
-        sys.exit("El SKILL no trae la sección «## El ciclo de una actividad».")
-    pasos = []
-    for fila in m.group(1).splitlines():
-        r = re.match(r"^\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|", fila)
-        if r:
-            t = re.sub(r"\*\*|`", "", r.group(2))
-            t = re.sub(r"\s*\([^)]*\)", "", t).strip()
-            pasos.append((int(r.group(1)), t[:1].upper() + t[1:]))
-    if [n for n, _ in pasos] != list(range(1, len(pasos) + 1)) or not pasos:
-        sys.exit("La tabla del ciclo en el SKILL no está numerada 1..N sin huecos.")
-    return pasos
-
-
-def pares_en_paralelo(ruta: str = SKILL_TRABAJAR) -> dict[int, int]:
-    """Los pasos que corren a la vez, de la línea «**En paralelo:** 4 y 5 · 10 y 11» del SKILL: {4: 5, 5: 4, …}."""
-    try:
-        texto = open(ruta, encoding="utf-8").read()
-    except OSError:
-        return {}
-    m = re.search(r"\*\*En paralelo:\*\*([^\n]*)", texto)
-    pares = {}
-    for x, y in re.findall(r"(\d+)\s+y\s+(\d+)", m.group(1) if m else ""):
-        pares[int(x)], pares[int(y)] = int(y), int(x)
-    return pares
+        return _ciclo.pasos_del_ciclo()
+    except _ciclo.Rechazo as e:
+        sys.exit(str(e))
 
 
 def cerrada(s: dict) -> bool:
@@ -227,6 +204,13 @@ def cmd_mover(args) -> None:
         sys.exit(f"{a['clave']} está bloqueada: {a['bloqueada']}")
     if args.columna == "revision" and a_ > de:
         abiertos = [str(x["ciclo"]) for x in a["subtareas"] if x.get("ciclo") and not cerrada(x)]
+        if any(x.get("ciclo") for x in a["subtareas"]):
+            try:
+                c = _ciclo.leer(os.getcwd(), a["clave"])
+            except (OSError, ValueError, _ciclo.Rechazo) as e:
+                sys.exit(f"No pude leer el checklist de {a['clave']} ({e}).")
+            if c is not None:  # sin él, un checklist de antes de la 0.9.0: manda el del tablero
+                abiertos = [str(n) for n in _ciclo.abiertos_hasta(c, len(c["pasos"]))]
         if abiertos:
             sys.exit(f"{a['clave']} tiene pasos del ciclo abiertos ({', '.join(abiertos)}): ciérralos antes de pasarla a Revisión de código.")
     texto = f"{NOMBRES[a['columna']]} → {NOMBRES[args.columna]}" + (" (retrabajo)" if a_ < de else "")
@@ -288,6 +272,19 @@ def cmd_subtarea(args) -> None:
     print(f"{a['clave']} · {sum(cerrada(x) for x in a['subtareas'])}/{len(a['subtareas'])} subtareas")
 
 
+def espejo(a: dict, p: dict) -> dict:
+    """La subtarea del tablero que refleja el paso p del checklist."""
+    s = next((x for x in a["subtareas"] if x.get("ciclo") == p["n"]), None)
+    if s is None:
+        s = {"titulo": f"{CICLO_PREFIJO} {p['n']} · {p['titulo']}", "ciclo": p["n"]}
+        a["subtareas"].append(s)
+    s.update(estado=p.get("estado", "pendiente"), hecha=p.get("estado") == "hecha")
+    for k in ("nota", "cuando"):
+        if k in p:
+            s[k] = p[k]
+    return s
+
+
 def cmd_ciclo(args) -> None:
     pasos = pasos_del_ciclo()
     if args.listar or not args.clave:
@@ -296,38 +293,48 @@ def cmd_ciclo(args) -> None:
         return
     t = cargar()
     a = actividad(t, args.clave)
-    if any(s.get("ciclo") for s in a["subtareas"]):
-        sys.exit(f"{a['clave']} ya tiene el checklist del ciclo.")
-    for n, tit in pasos:
-        a["subtareas"].append({"titulo": f"{CICLO_PREFIJO} {n} · {tit}", "hecha": False, "ciclo": n, "estado": "pendiente"})
-    bitacora(a, f"checklist del ciclo agregado ({len(pasos)} pasos)")
+    viejo = {s["ciclo"]: s for s in a["subtareas"] if s.get("ciclo")}
+    try:
+        if viejo and _ciclo.leer(os.getcwd(), a["clave"]) is not None:
+            sys.exit(f"{a['clave']} ya tiene el checklist del ciclo.")
+        c = _ciclo.leer(os.getcwd(), a["clave"]) or _ciclo.crear(os.getcwd(), a["clave"])
+    except _ciclo.Rechazo as e:
+        sys.exit(str(e))
+    if viejo:
+        # Checklist de antes de la 0.9.0, solo en el tablero: pasa a ciclo.py tal como estaba.
+        for p in c["pasos"]:
+            s = viejo.get(p["n"])
+            if s and cerrada(s):
+                p.update(estado=s.get("estado", "hecha"), nota=f"(antes de 0.9.0) {s.get('nota', '')}".strip(),
+                         cuando=s.get("cuando", ahora()))
+        _ciclo.escribir(_ciclo.ruta_viva(os.getcwd(), a["clave"]), c)
+    for p in c["pasos"]:
+        espejo(a, p)
+    bitacora(a, ("checklist del ciclo pasado a ciclo.py" if viejo else "checklist del ciclo agregado")
+             + f" ({len(c['pasos'])} pasos)")
     guardar(t)
-    print(f"{a['clave']} · checklist del ciclo: {len(pasos)} pasos")
+    print(f"{a['clave']} · checklist del ciclo: {len(c['pasos'])} pasos")
 
 
 def cmd_paso(args) -> None:
     t = cargar()
     a = actividad(t, args.clave)
-    ciclo = sorted((s for s in a["subtareas"] if s.get("ciclo")), key=lambda s: s["ciclo"])
-    if not ciclo:
+    if not any(s.get("ciclo") for s in a["subtareas"]):
         sys.exit(f"{a['clave']} no tiene el checklist del ciclo: `tablero.py ciclo {a['clave']}`.")
-    s = next((x for x in ciclo if x["ciclo"] == args.n), None)
-    if not s:
-        sys.exit(f"El ciclo de {a['clave']} va del 1 al {ciclo[-1]['ciclo']}.")
-    if cerrada(s):
-        sys.exit(f"El paso {args.n} ya está cerrado ({ESTADOS_PASO[s['estado']]}: {s.get('nota', '')}).")
-    pareja = pares_en_paralelo().get(args.n)  # su par corre a la vez: puede seguir abierto
-    abiertos = [x["ciclo"] for x in ciclo if x["ciclo"] < args.n and x["ciclo"] != pareja and not cerrada(x)]
-    if abiertos:
-        sys.exit(f"Antes del paso {args.n} cierra los anteriores: {', '.join(map(str, abiertos))}. El checklist manda el orden.")
     estado, nota = (("hecha", args.hecho) if args.hecho is not None else
                     ("no_aplica", args.no_aplica) if args.no_aplica is not None else ("omitida", args.omitido))
-    if not (nota or "").strip():
-        sys.exit("Falta el texto: la evidencia, el motivo de «no aplica» o quién permitió omitirlo y por qué.")
-    s.update(estado=estado, nota=nota.strip(), hecha=estado == "hecha", cuando=ahora())
+    try:
+        if _ciclo.leer(os.getcwd(), a["clave"]) is None:
+            sys.exit(f"El checklist de {a['clave']} es de antes de la 0.9.0: `tablero.py ciclo {a['clave']}` lo pasa "
+                     "a ciclo.py tal como está, y luego sigues marcando.")
+        c, p = _ciclo.marcar(os.getcwd(), a["clave"], args.n, estado, nota)
+    except _ciclo.Rechazo as e:
+        sys.exit(str(e))
+    s = espejo(a, p)
     bitacora(a, f"paso {args.n} {ESTADOS_PASO[estado]}: {s['titulo']} — {s['nota']}")
     guardar(t)
-    print(f"{a['clave']} · paso {args.n} {ESTADOS_PASO[estado]} · ciclo {sum(cerrada(x) for x in ciclo)}/{len(ciclo)}")
+    print(f"{a['clave']} · paso {args.n} {ESTADOS_PASO[estado]} · ciclo "
+          f"{sum(_ciclo.cerrado(x) for x in c['pasos'])}/{len(c['pasos'])}")
 
 
 def cmd_fechas(args) -> None:

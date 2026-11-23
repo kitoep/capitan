@@ -3,6 +3,11 @@
 Copia este bloque TAL CUAL al inicio del encargo y debajo pon lo propio de la
 tarea. No se resume ni se omite: es lo que evita los errores del 2026-10-02.
 
+La primera línea de lo propio dice a qué paso del ciclo pertenece:
+«Paso N de <PROYECTO>/ACT-0xx», o «Fuera del ciclo: <motivo>» si el agente no
+es parte de una actividad. El hook revisa en el checklist que los pasos
+anteriores estén cerrados; sin esa línea, no deja lanzar el encargo.
+
 ---
 
 **Reglas que no se negocian en este encargo:**

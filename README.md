@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="Versión" src="https://img.shields.io/badge/versión-0.8.2-1f5c8f">
+  <img alt="Versión" src="https://img.shields.io/badge/versión-0.9.0-1f5c8f">
   <img alt="Plugin de Claude Code" src="https://img.shields.io/badge/Claude_Code-plugin-a5761c">
   <img alt="Python 3" src="https://img.shields.io/badge/Python-3-4b5566">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-1a7f37">
@@ -148,7 +148,7 @@ de la actividad (abajo).
 | 9 | **Ajustar las pruebas** | Si la crítica cambió el plan o hubo desvíos, el agente de pruebas los recibe | El plan de pruebas cubre cada desvío; sin ninguno, «no aplica» |
 | 10 | **Ejecutar las pruebas** | Tests y recorridos E2E con captura de cada paso, claro/oscuro y dos anchos; a la vez que el 11, sobre el mismo commit | Verde con el cambio **y rojo sin él**; prueba también lo que haya arreglado seguridad |
 | 11 | **Seguridad del diff** | En **toda** actividad, a la vez que el 10 | Cada hallazgo se cierra o se justifica; revisa también lo que haya arreglado el probador |
-| 12 | **Verificador** | CI local y puerta visual, con evidencia ejecutada | Todo verde o no se sube, con el conteo literal de la salida (no un «todo verde» de memoria) y el commit registrado por el CI local |
+| 12 | **Verificador** | CI local de las áreas que toca la rama y puerta visual, con evidencia ejecutada; el CI completo corre una vez por sesión, antes del PR | Todo verde o no se sube, con el conteo literal de la salida (no un «todo verde» de memoria) y el commit registrado por el CI local |
 | 13 | **Entregar** | Commits con la clave, merge `--no-ff` a la rama de sesión | Nunca a la principal, nunca squash |
 | 14 | **Hallazgos** | Al registro de defectos, con la solución recomendada completa | — |
 | 15 | **Relevo** | Reescribe `estado.md` y anota todo para el reporte | Al día **antes** de documentar y de tomar la siguiente |
@@ -166,25 +166,47 @@ pasos («Ciclo 4 · Crítica + seguridad del plan»), separados de las subtareas
 propias del trabajo. Mientras la actividad corre, cualquiera que mire el
 tracker ve en qué paso va y cuál falta.
 
-- **Cada paso se marca en el momento**, con su evidencia: el agente y su
-  veredicto, el commit, el CI, la rama.
-- **Lo que no aplica se dice**: «no aplica: es mejora, no bug». Nunca se borra,
-  nunca se deja abierto y nunca se marca como hecho.
-- **Lo que se salta con tu permiso** queda como «omitido», con quién lo
-  permitió y por qué. Sin tu permiso no se salta nada.
+**Es mecánico, con cualquier tracker.** El checklist de verdad lo lleva un
+script (`ciclo.py`) junto al repo; la tarjeta del tracker es su espejo. Que no
+se le pase registrar nada no depende de la memoria de Claude:
+
+- **Cada paso se marca en el momento, con evidencia que el script revisa.**
+  Si falta, no lo marca y dice qué falta. Algunos ejemplos:
+  - la rama tiene que existir;
+  - el plan de pruebas tiene que estar en un archivo;
+  - el probador y seguridad dicen qué commit revisaron, y no puede haber
+    código nuevo después;
+  - el CI tiene que haber corrido de verdad sobre la punta de la rama, y el
+    script copia el conteo literal de su salida;
+  - la hora y el uso de inicio y cierre los lee del reloj y del medidor, no se
+    teclean.
+- **Lo que no aplica se dice**: «no aplica: es mejora, no bug». Solo cinco
+  pasos pueden no aplicar; las pruebas y la seguridad del diff, nunca.
+- **Lo que se salta con tu permiso** queda como «omitido», con tu permiso y
+  la fecha. Sin tu permiso no se salta nada.
 - **El checklist manda el orden.** Un paso no empieza sin cerrar el anterior,
   salvo los revisores que no dependen uno del otro y corren a la vez: crítica
   y plan de pruebas (4 y 5), probador y seguridad del diff (10 y 11). Si uno
-  provoca un cambio, el otro lo revisa antes de cerrar su paso. La puerta es la condición para marcarlo, y ni la prisa ni el uso de la
-  cuenta justifican saltarse uno. Si hay que parar, para con el checklist al
-  día, y la siguiente conversación retoma en el primer paso abierto.
+  provoca un cambio, el otro lo revisa y vuelve a marcar su paso sobre el
+  commit nuevo. La puerta es la condición para marcar, y ni la prisa ni el uso
+  de la cuenta justifican saltarse un paso. Si hay que parar, para con el
+  checklist al día, y la siguiente conversación retoma en el primer paso
+  abierto.
+- **Los candados lo leen en cada puerta**:
+  - al lanzar un agente;
+  - en el merge de la actividad a la rama de sesión;
+  - al pasar la tarjeta a Revisión de código;
+  - al abrir el PR.
+- **Viaja en el PR.** Al cerrar la actividad, su checklist queda en
+  `docs/capitan/ciclo/ACT-0xx.json`, dentro del PR de la sesión. Si Claude se
+  detiene a medias, deja esa copia en el commit del punto limpio, y otra
+  máquina retoma desde ahí.
+- **Un paso mal marcado** solo se reabre con tu permiso escrito, y lo
+  anterior queda guardado.
 - **Documentar es siempre lo último** (paso 16). Si tu tracker mueve la
   tarjeta solo al completar las subtareas, eso coincide con el paso a Revisión
   de código. Claude nunca cuenta con ese movimiento: después de marcar revisa
   la columna y la corrige si hace falta.
-
-Con el tablero local, `tablero.py` lo hace cumplir: no marca un paso con uno
-anterior abierto (salvo su par en paralelo) y no pasa la tarjeta a Revisión de código con pasos abiertos.
 
 ---
 
@@ -477,12 +499,14 @@ le pide a nadie que se acuerde de pagar, simplemente no gira sin boleto.
 |---|---|---|---|
 | **Relevo al abrir** | Al abrir, retomar, después de `/clear` y al compactar | Le entrega a Claude el estado y las decisiones | Una conversación se compactó y lo que Claude sabía dependía de su propio resumen |
 | **Aviso de decisiones** | En cada mensaje tuyo | Le recuerda escribir la decisión si el mensaje trae una | Cuesta unas palabras por mensaje |
-| **Brief de cada agente** | Al encargar a un agente | 🛑 Bloquea el encargo si no trae las reglas base | Un agente probó pero no compiló, y rompió el trabajo de todos |
+| **Brief de cada agente** | Al encargar a un agente | 🛑 Bloquea el encargo si no trae las reglas base o no dice a qué paso pertenece, y si ese paso todavía no toca según el checklist | Un agente probó pero no compiló, y rompió el trabajo de todos |
+| **Checklist en el merge** | `git merge` de una actividad a la rama de sesión | 🛑 Exige los pasos 1 al 12 cerrados, y que el probador, seguridad y el CI hayan visto el último commit de código | Revisores en paralelo: si un arreglo llega después de una revisión, el otro revisor tiene que verlo |
 | **Agentes sin git** | En cada comando de un agente | 🛑 Bloquea commits, cambios de rama, merges, stash… | Un agente aplicó cambios viejos y dejó el repo en conflicto |
 | **Juez de decisiones** | Antes de `git merge` y `gh pr create` | 🛑 Otro modelo (Sonnet) compara lo que dijiste con `decisiones.md` y bloquea si falta algo, citando tus palabras | Es el único que gasta uso, por eso corre solo en esos dos momentos |
-| **Relevo antes de Revisión** | Al pasar una tarjeta a Revisión de código en un tracker por MCP | 🛑 Exige `estado.md` reescrito después del merge de la actividad, con su hora de inicio y cierre y el uso gastado | En una sesión, ninguna actividad tuvo hora ni uso medidos y el relevo se escribió solo al final |
+| **Relevo antes de Revisión** | Al pasar una tarjeta a Revisión de código en un tracker por MCP | 🛑 Exige `estado.md` reescrito después del merge de la actividad, con su hora de inicio y cierre y el uso gastado, y el checklist cerrado del 1 al 15 | En una sesión, ninguna actividad tuvo hora ni uso medidos y el relevo se escribió solo al final |
 | **CI que de verdad corrió** | Al correr `ci_local.py` | 🛑 No da por verde una corrida con errores del shell, aunque salga 0, y guarda las últimas líneas de la salida como evidencia | Un «CI verde» se declaró cuando la mitad de las pruebas nunca corrió por un error del shell |
 | **Push con pruebas** | `git push` de una rama con PR abierto | 🛑 Exige el CI local en verde sobre ese mismo commit | Un PR corrió las pruebas de GitHub tres veces en una hora, y cada corrida se cobra |
+| **PR de la sesión** | `gh pr create` | 🛑 Exige cada actividad de la sesión con su checklist 16/16 y su copia en el PR, y el CI completo sobre ese commit | El CI por área ahorra tiempo en cada actividad; el completo corre una vez, aquí |
 
 Si un candado no puede correr (por ejemplo, sin internet), **avisa y deja
 pasar** en vez de bloquear.
@@ -578,7 +602,7 @@ skills/configurar/     /capitan:configurar
 skills/trabajar/       /capitan:trabajar — el método completo
 hooks/hooks.json       qué candado corre en qué momento
 scripts/               candados, tablero, medidor, reporte y sus revisores
-tests/                 pruebas del tablero (python3 -m unittest discover -s tests)
+tests/                 pruebas del tablero, el checklist y los candados (python3 -m unittest discover -s tests)
 plantillas/            el brief de agentes y la página del reporte
 docs/assets/           el banner y los diagramas de este README
 ```
