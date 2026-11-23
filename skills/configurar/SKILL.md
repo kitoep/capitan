@@ -193,7 +193,8 @@ Encuéntralo tú y **pide confirmación en bloque**:
 | Reglas del repo | `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md` |
 | Puerta visual y design system | docs de UI, paquete de design system |
 | CI-equivalente local | `Makefile`, `package.json`, `pyproject.toml`, `.github/workflows/` — **los comandos que corre el CI**, no los que parecen |
-| CI local (un comando) | El mismo CI-equivalente en UN comando (p. ej. `make ci`); si el repo no lo tiene, proponer crearlo. Va en la config como fila `| CI local | `<comando>` |`: lo usa el candado de push |
+| CI local (un comando) | El mismo CI-equivalente en UN comando (p. ej. `make ci`); si el repo no lo tiene, proponer crearlo. Va en la config como fila `| CI local | `<comando>` |`: lo usan el candado de push y el del PR. Corre una vez por sesión, antes del PR |
+| CI por área | Las suites por carpeta: qué comando prueba qué rutas (backend, frontend, scripts…), sacado de lo que corre el CI de verdad. Va en `## CI por área` (abajo). El paso 12 corre solo las áreas que toca la rama; un archivo fuera de toda área corre el CI completo. Si el repo es chico o no se deja partir, no se escribe la sección y el 12 corre todo |
 | Rama principal | `git symbolic-ref refs/remotes/origin/HEAD` |
 | Ambiente de verificación | docs de deploy, workflows — o «no hay» y qué cuenta como Listo |
 | Entorno local | `docker-compose*`, `Makefile` — y cómo se apaga |
@@ -218,6 +219,21 @@ Lo que no encuentres se pregunta; lo que el dueño no sepa queda como
    si hay repositorio ligado).
    La existencia de `.claude/capitan.md` es lo que **enciende los hooks** del
    plugin en este repo.
+
+   **`## CI por área`** (si aplica) también lleva forma fija, porque la lee
+   `ci_local.py --areas`. La primera celda es el nombre del área, las rutas
+   van entre backticks (carpetas o archivos) y el comando también:
+
+   ```
+   ## CI por área
+
+   | Área | Rutas | Comando |
+   |---|---|---|
+   | backend | `backend/` | `cd backend && pytest -q` |
+   | frontend | `web/` `package.json` | `npm test --prefix web` |
+   ```
+
+   Lo que cae en `docs/` no cuenta como código.
 
    **`## Tracker` lleva forma fija**, porque un candado la lee
    (`hook_tracker.py`): la primera celda es el nombre de la operación o de la

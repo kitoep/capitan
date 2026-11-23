@@ -12,6 +12,9 @@ esa herramienta con ese destino, exige que el relevo esté al día:
   2. su línea de la actividad trae la hora de inicio y de cierre
      (HH:MM → HH:MM) y el uso gastado: la medición se hace con el reloj, no
      se reconstruye de los commits.
+  3. el checklist del ciclo (ciclo.py) tiene cerrados los pasos 1 al 15: el
+     hook no puede leer las subtareas del tracker, pero sí el checklist local
+     del que el tracker es espejo.
 
 Nació de una sesión real: de tres actividades, ninguna tuvo hora ni uso
 medidos y el relevo solo se escribió al final.
@@ -143,6 +146,20 @@ def main() -> None:
         bloquear(f"Bloqueado: en docs/capitan/estado.md («## Dónde quedó») la línea de {clave} debe traer la hora "
                  "de inicio y de cierre (HH:MM → HH:MM) y el uso gastado, medidos con el reloj y el medidor, "
                  "no reconstruidos de los commits. Agrégala y vuelve a mover.")
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import ciclo
+    try:
+        c = ciclo.leer(cwd, clave)
+    except (OSError, ValueError) as e:
+        avisar(f"no pude leer el checklist de {clave} ({e}); revisa a mano que los pasos 1 al 15 estén cerrados, "
+               "y anótalo en docs/capitan/aprendizajes.md.")
+    if c is None:
+        bloquear(f"Bloqueado: {clave} no tiene checklist del ciclo (`ciclo.py crear {clave}`, paso 2), así que nada "
+                 "dice que sus pasos se hicieron. Créalo y ciérralos antes de pasarla a Revisión de código.")
+    abiertos = ciclo.abiertos_hasta(c, len(c["pasos"]) - 1)
+    if abiertos:
+        bloquear(f"Bloqueado: el checklist de {clave} tiene abiertos los pasos {', '.join(map(str, abiertos))}. "
+                 f"Pasar a Revisión de código es el último paso: antes van cerrados los demás (`ciclo.py ver {clave}`).")
     sys.exit(0)
 
 

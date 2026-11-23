@@ -18,6 +18,10 @@ SCRIPTS = os.path.join(RAIZ, "scripts")
 sys.path.insert(0, SCRIPTS)
 from version_plugin import aviso_version  # noqa: E402
 from hook_tracker import aviso_config  # noqa: E402
+import ci_local  # noqa: E402
+from repo_actividad import CLAVE, RAMA, SESION, RepoActividad, escribir_checklist  # noqa: E402
+
+QUINCE = {n: {} for n in range(1, 16)}
 
 CONFIG = """# Capitán · mi-proyecto
 
@@ -103,8 +107,22 @@ class HookTracker(Repo):
 
     def test_deja_pasar_con_el_relevo_al_dia(self):
         self.estado(ESTADO_OK)
+        escribir_checklist(self.dir, "ACT-012", QUINCE)
         r = self.hook()
         self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_bloquea_sin_checklist(self):
+        self.estado(ESTADO_OK)
+        r = self.hook()
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("no tiene checklist", r.stderr)
+
+    def test_bloquea_con_un_paso_abierto(self):
+        self.estado(ESTADO_OK)
+        escribir_checklist(self.dir, "ACT-012", {n: {} for n in range(1, 16) if n != 11})
+        r = self.hook()
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("abiertos los pasos 11", r.stderr)
 
     def test_bloquea_si_estado_no_se_reescribio_tras_el_merge(self):
         self.estado(ESTADO_OK, despues_del_merge=False)
@@ -184,6 +202,266 @@ class CandadoApagado(Repo):
     def test_hook_inicio_calla_con_la_forma_fija(self):
         self.escribir(".claude/capitan.md", CONFIG.format(ci="true"))
         self.assertNotIn("systemMessage", self.inicio())
+
+
+def correr_hook(script, cwd, entrada, env=None):
+    return subprocess.run([sys.executable, os.path.join(SCRIPTS, script)], input=json.dumps({"cwd": cwd, **entrada}),
+                          capture_output=True, text=True, env=env)
+
+
+class HookCiclo(unittest.TestCase):
+    """El merge a la rama de sesión y el PR leen el checklist."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.r = RepoActividad(self.tmp.name)
+        self.r.ciclo("crear", CLAVE)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def bash(self, comando):
+        return correr_hook("hook_ciclo.py", self.r.dir, {"tool_name": "Bash", "tool_input": {"command": comando}})
+
+    def merge(self):
+        sh(self.r.dir, "git", "checkout", "-q", SESION)
+        return self.bash(f"git merge --no-ff -m 'Merge ABC-001/{CLAVE} mejora' {RAMA}")
+
+    def test_merge_con_1_a_12_al_dia_pasa(self):
+        self.r.cerrar_hasta(12)
+        r = self.merge()
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_merge_con_pasos_abiertos_se_bloquea(self):
+        self.r.cerrar_hasta(9)
+        r = self.merge()
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("10, 11, 12", r.stderr)
+
+    def test_merge_con_codigo_sin_revisar_se_bloquea(self):
+        self.r.cerrar_hasta(12)
+        self.r.cambio("app/algo.py", "def algo():\n    return 3\n", "fix: tarde")
+        r = self.merge()
+        self.assertEqual(r.returncode, 2)
+        for n in ("10", "11", "12"):
+            self.assertIn(f"el paso {n}", r.stderr)
+
+    def test_merge_sin_checklist_se_bloquea(self):
+        os.remove(os.path.join(sh(self.r.dir, "git", "rev-parse", "--path-format=absolute", "--git-common-dir").strip(),
+                               "capitan", "ciclo", f"{CLAVE}.json"))
+        r = self.merge()
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("no tiene checklist", r.stderr)
+
+    def test_comandos_que_solo_mencionan_merge_o_pr_no_se_revisan(self):
+        self.r.cerrar_hasta(2)
+        sh(self.r.dir, "git", "checkout", "-q", SESION)
+        for comando in (f"git merge-base --is-ancestor {RAMA} HEAD",
+                        'git commit -m "docs: explica gh pr create y git merge"',
+                        "cat <<'FIN' > nota.md\ngh pr create --fill\ngit merge " + RAMA + "\nFIN",
+                        "git merge --abort"):
+            r = self.bash(comando)
+            self.assertEqual(r.returncode, 0, f"{comando}: {r.stderr}")
+
+    def test_merge_con_C_o_cd_tambien_se_revisa(self):
+        self.r.cerrar_hasta(9)
+        sh(self.r.dir, "git", "checkout", "-q", SESION)
+        r = correr_hook("hook_ciclo.py", os.path.dirname(self.r.dir),
+                        {"tool_input": {"command": f"git -C {os.path.basename(self.r.dir)} merge --no-ff {RAMA}"}})
+        self.assertEqual(r.returncode, 2, r.stderr)
+        r = correr_hook("hook_ciclo.py", self.r.dir,
+                        {"tool_input": {"command": f"cd . && git -c core.x=1 merge {RAMA}"}})
+        self.assertEqual(r.returncode, 2, r.stderr)
+
+    def test_la_clave_sale_de_la_rama_registrada_en_el_paso_1(self):
+        import hook_ciclo
+        self.r.cerrar(1)
+        self.assertEqual(hook_ciclo.clave_de(self.r.dir, RAMA, ""), CLAVE)
+        self.assertEqual(hook_ciclo.clave_de(self.r.dir, "otra-act-1-x", ""), CLAVE)  # act-1 = ACT-001
+        self.assertEqual(hook_ciclo.clave_de(self.r.dir, "sin-numero", "Merge ABC-001/ACT-044 algo"), "ACT-044")
+        self.assertIsNone(hook_ciclo.clave_de(self.r.dir, "sin-numero", ""))
+
+    def test_merge_fuera_de_la_rama_de_sesion_no_se_revisa(self):
+        sh(self.r.dir, "git", "checkout", "-q", "main")
+        self.assertEqual(self.bash(f"git merge {RAMA}").returncode, 0)
+
+    def cerrar_sesion(self, copia=True, ci=True):
+        self.r.cerrar_hasta(16)
+        if copia:
+            sh(self.r.dir, "git", "add", "docs/capitan/ciclo", "docs/capitan/estado.md")
+            sh(self.r.dir, "git", "commit", "-q", "-m", "docs: relevo")
+        if ci:
+            ruta = ci_local.archivo_ok(self.r.dir)
+            os.makedirs(os.path.dirname(ruta), exist_ok=True)
+            with open(ruta, "a", encoding="utf-8") as f:
+                f.write(sh(self.r.dir, "git", "rev-parse", "HEAD") + "\n")
+
+    def test_pr_con_todo_cerrado_pasa(self):
+        self.cerrar_sesion()
+        r = self.bash("gh pr create --fill")
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_pr_sin_ci_completo_se_bloquea(self):
+        self.cerrar_sesion(ci=False)
+        r = self.bash("gh pr create --fill")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("CI completo", r.stderr)
+
+    def test_pr_sin_la_copia_se_bloquea(self):
+        self.cerrar_sesion(copia=False)
+        r = self.bash("gh pr create --fill")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn(f"docs/capitan/ciclo/{CLAVE}.json", r.stderr)
+
+    def test_pr_con_una_actividad_a_medias_se_bloquea(self):
+        self.r.cerrar_hasta(13)
+        r = self.bash("gh pr create --fill")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn(f"{CLAVE}: pasos abiertos 14, 15, 16", r.stderr)
+
+
+class HookBrief(unittest.TestCase):
+    BRIEF = "Reglas que no se negocian en este encargo\n"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.r = RepoActividad(self.tmp.name)
+        self.r.ciclo("crear", CLAVE)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def agente(self, prompt, tipo="general-purpose"):
+        return correr_hook("hook_brief.py", self.r.dir,
+                           {"tool_name": "Agent", "tool_input": {"subagent_type": tipo, "prompt": prompt}})
+
+    def test_sin_brief_se_bloquea(self):
+        self.assertIn("brief base", self.agente("Paso 3 de ACT-001").stderr)
+
+    def test_sin_declarar_el_paso_se_bloquea(self):
+        r = self.agente(self.BRIEF + "critica el plan")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("Paso 10 de ACT-012", r.stderr)
+
+    def test_fuera_del_ciclo_pasa(self):
+        self.assertEqual(self.agente(self.BRIEF + "Fuera del ciclo: escribir el plan del proyecto").returncode, 0)
+
+    def test_paso_con_anteriores_abiertos_se_bloquea(self):
+        self.r.cerrar_hasta(8)
+        r = self.agente(self.BRIEF + "Paso 10 de ABC-001/ACT-001: corre las pruebas")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("abiertos los pasos 9", r.stderr)
+
+    def test_paso_en_paralelo_con_su_par_abierto_pasa(self):
+        self.r.cerrar_hasta(3)
+        self.assertEqual(self.agente(self.BRIEF + "Paso 5 de ACT-001: plan de pruebas").returncode, 0)
+        self.assertEqual(self.agente(self.BRIEF + "Paso 4 de ACT-001: crítica").returncode, 0)
+
+    def test_paso_sin_checklist_se_bloquea(self):
+        r = self.agente(self.BRIEF + "Paso 10 de ACT-077: pruebas")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("no tiene checklist", r.stderr)
+
+    def test_la_plantilla_completa_no_cuenta_como_declaracion(self):
+        with open(os.path.join(RAIZ, "plantillas", "brief-agente.md"), encoding="utf-8") as f:
+            plantilla = f.read()
+        r = self.agente(plantilla + "\nHaz X, y revisa lo del paso 7 de ACT-001.")
+        self.assertEqual(r.returncode, 2, r.stdout)
+        self.assertEqual(self.agente(plantilla + "\nPaso 3 de ACT-001: el plan").returncode, 2)  # 1 y 2 abiertos
+        self.assertEqual(self.agente(plantilla + "\nFuera del ciclo: revisar el README").returncode, 0)
+
+    def test_solo_lectura_sin_declarar_pasa(self):
+        self.assertEqual(self.agente("busca dónde se define X", tipo="Explore").returncode, 0)
+
+    def test_solo_lectura_que_declara_paso_tambien_respeta_el_orden(self):
+        self.assertEqual(self.agente("Paso 4 de ACT-001: crítica", tipo="Plan").returncode, 2)
+
+
+class CiPorArea(unittest.TestCase):
+    AREAS = """
+## CI por área
+
+| Área | Rutas | Comando |
+|---|---|---|
+| app | `app/` | `echo '3 passed (app)'` |
+| web | `web/` `paquete.json` | `echo '9 passed (web)'` |
+"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.r = RepoActividad(self.tmp.name)
+        sh(self.r.dir, "git", "checkout", "-q", "main")
+        self.r.escribir(".claude/capitan.md", self.r_config() + self.AREAS)
+        self.r.commit("areas")
+        sh(self.r.dir, "git", "checkout", "-q", RAMA)
+        sh(self.r.dir, "git", "merge", "-q", "main")
+
+    def r_config(self):
+        from repo_actividad import CONFIG
+        return CONFIG.replace("`true`", "`echo '100 passed (todo)'`")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def ci(self, *args):
+        return subprocess.run([sys.executable, os.path.join(SCRIPTS, "ci_local.py"), *args], cwd=self.r.dir,
+                              capture_output=True, text=True)
+
+    def registro(self):
+        return open(os.path.join(ci_local.dir_capitan(self.r.dir), "ci-registro.log"), encoding="utf-8").read()
+
+    def verdes(self):
+        try:
+            return open(ci_local.archivo_ok(self.r.dir), encoding="utf-8").read()
+        except OSError:
+            return ""
+
+    def test_corre_solo_el_area_tocada(self):
+        r = self.ci("--areas")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("3 passed (app)", r.stdout)
+        self.assertNotIn("(web)", r.stdout)
+        self.assertNotIn("(todo)", r.stdout)
+        self.assertIn("áreas: app", self.registro())
+        self.assertEqual(self.verdes(), "")  # una corrida por área no cuenta como CI completo
+
+    def test_un_archivo_sin_area_corre_todo(self):
+        self.r.cambio("Makefile", "x:\n", "build")
+        r = self.ci("--areas")
+        self.assertIn("100 passed (todo)", r.stdout)
+        self.assertIn("Makefile", r.stdout)
+        self.assertIn(sh(self.r.dir, "git", "rev-parse", "HEAD"), self.verdes())
+
+    def test_solo_docs_no_corre_nada(self):
+        sh(self.r.dir, "git", "checkout", "-q", "-b", "solo-docs", "main")
+        self.r.escribir("docs/guia.md", "x\n")
+        self.r.commit("docs")
+        r = self.ci("--areas")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("sin código", self.registro())
+
+    def test_sin_areas_en_la_config_corre_todo(self):
+        sh(self.r.dir, "git", "checkout", "-q", "main")
+        self.r.escribir(".claude/capitan.md", self.r_config())
+        self.r.commit("sin areas")
+        r = self.ci("--areas")
+        self.assertIn("100 passed (todo)", r.stdout)
+
+    def test_una_base_que_no_existe_corre_todo(self):
+        r = self.ci("--areas", "--base", "mian")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("100 passed (todo)", r.stdout)
+        self.assertNotIn("sin código", self.registro())
+
+    def test_el_paso_12_lee_la_corrida_por_area(self):
+        self.r.ciclo("crear", CLAVE)
+        for n in range(1, 12):
+            self.r.cerrar(n)
+        self.assertEqual(self.ci("--areas").returncode, 0)
+        r = self.r.ciclo("paso", CLAVE, "12", "--hecho", "CI por área")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("CI áreas: app", r.stdout)
+        self.assertIn("«3 passed (app)»", r.stdout)
 
 
 class CiLocal(Repo):

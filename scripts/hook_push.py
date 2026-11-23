@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Hook PreToolUse de Bash (plugin capitan). No deja hacer `git push` a una
 rama que tiene un PR abierto si el CI local no pasó sobre ESE commit
-(`ci_local.py` lo anota en .git/capitan/ci-ok).
+(`ci_local.py` lo anota en ci-ok, en el directorio común de git).
 
 Por qué solo con PR abierto: subir una rama sin PR no dispara el CI de GitHub
 (el método sube las ramas de actividad sin PR), así que no gasta. Con PR

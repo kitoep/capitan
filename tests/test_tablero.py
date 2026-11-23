@@ -12,6 +12,8 @@ import sys
 import tempfile
 import unittest
 
+from repo_actividad import RAMA, RepoActividad  # noqa: E402
+
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLERO = os.path.join(RAIZ, "scripts", "tablero.py")
 SKILL = os.path.join(RAIZ, "skills", "trabajar", "SKILL.md")
@@ -20,9 +22,11 @@ SKILL = os.path.join(RAIZ, "skills", "trabajar", "SKILL.md")
 class Tablero(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.dir = self.tmp.name
+        # Un repo de verdad: el checklist vive junto al repo (ciclo.py) y valida la evidencia.
         # HOME propio: el medidor de sesión de la máquina no debe colarse en la prueba.
-        self.env = {**os.environ, "HOME": self.dir, "USERPROFILE": self.dir, "PYTHONUTF8": "1"}
+        self.repo = RepoActividad(self.tmp.name)
+        self.dir = self.repo.dir
+        self.env = self.repo.env
         self.ok("init", "mi-proyecto")
         self.ok("epica", "M1", "Primera épica")
         self.ok("crear", "M1 · Una mejora", "--epica", "M1", "--subtarea", "Escribir la consulta")
@@ -60,9 +64,13 @@ class Tablero(unittest.TestCase):
         self.ok("mover", "ACT-001", "por_hacer")
         self.ok("mover", "ACT-001", "en_curso")
 
+    def cerrar(self, n):
+        bandera, texto = self.repo.evidencia(n)
+        self.ok("paso", "ACT-001", str(n), bandera, texto)
+
     def cerrar_hasta(self, n):
         for i in range(1, n + 1):
-            self.ok("paso", "ACT-001", str(i), "--hecho", f"evidencia {i}")
+            self.cerrar(i)
 
     # --- leer el ciclo del SKILL ---
     def test_listar_lee_la_tabla_del_skill(self):
@@ -98,12 +106,17 @@ class Tablero(unittest.TestCase):
     # --- marcar ---
     def test_paso_hecho_guarda_evidencia_y_bitacora(self):
         self.ok("ciclo", "ACT-001")
-        self.ok("paso", "ACT-001", "1", "--hecho", "rama mi-proyecto-act-001-mejora")
+        self.ok("paso", "ACT-001", "1", "--hecho", f"rama {RAMA}")
         p = self.ciclo()[0]
         self.assertEqual((p["estado"], p["hecha"]), ("hecha", True))
-        self.assertEqual(p["nota"], "rama mi-proyecto-act-001-mejora")
+        self.assertEqual(p["nota"], f"rama {RAMA}")
         self.assertIn("paso 1 hecho", self.act()["bitacora"][-1]["que"])
-        self.assertIn("rama mi-proyecto-act-001-mejora", self.html())
+        self.assertIn(f"rama {RAMA}", self.html())
+
+    def test_evidencia_invalida_no_toca_el_espejo(self):
+        self.ok("ciclo", "ACT-001")
+        self.assertIn("rama", self.falla("paso", "ACT-001", "1", "--hecho", "rama que-no-existe"))
+        self.assertEqual(self.ciclo()[0]["estado"], "pendiente")
 
     def test_paso_sin_evidencia_se_niega(self):
         self.ok("ciclo", "ACT-001")
@@ -113,14 +126,14 @@ class Tablero(unittest.TestCase):
 
     def test_paso_se_niega_con_uno_anterior_abierto(self):
         self.ok("ciclo", "ACT-001")
-        self.ok("paso", "ACT-001", "1", "--hecho", "rama")
+        self.cerrar(1)
         err = self.falla("paso", "ACT-001", "3", "--hecho", "plan escrito")
         self.assertIn("2", err)
         self.assertEqual(self.ciclo()[2]["estado"], "pendiente")
 
     def test_paso_cerrado_no_se_vuelve_a_marcar(self):
         self.ok("ciclo", "ACT-001")
-        self.ok("paso", "ACT-001", "1", "--hecho", "rama")
+        self.cerrar(1)
         self.falla("paso", "ACT-001", "1", "--no-aplica", "otra cosa")
         self.assertEqual(self.ciclo()[0]["estado"], "hecha")
 
@@ -129,37 +142,15 @@ class Tablero(unittest.TestCase):
         self.assertIn("paso 1", self.falla("subtarea", "ACT-001", "2", "--hecha"))
         self.ok("subtarea", "ACT-001", "1", "--hecha")  # la propia del trabajo sí
 
-    # --- revisores en paralelo ---
-    def test_pares_en_paralelo_se_leen_del_skill(self):
-        sys.path.insert(0, os.path.dirname(TABLERO))
-        from tablero import pares_en_paralelo
-        self.assertEqual(pares_en_paralelo(SKILL), {4: 5, 5: 4, 10: 11, 11: 10})
-
+    # --- revisores en paralelo (las reglas viven en ciclo.py; aquí, que el tablero las respete) ---
     def test_plan_de_pruebas_cierra_antes_que_la_critica(self):
         self.ok("ciclo", "ACT-001")
         self.cerrar_hasta(3)
-        self.ok("paso", "ACT-001", "5", "--hecho", "plan de pruebas: 9 casos, 4 adversariales")
+        self.cerrar(5)
         self.assertIn("4", self.falla("paso", "ACT-001", "6", "--no-aplica", "es mejora"))
-        self.ok("paso", "ACT-001", "4", "--hecho", "crítica opus: 2 puntos corregidos")
-        self.ok("paso", "ACT-001", "6", "--no-aplica", "es mejora")
-
-    def test_el_par_no_salta_lo_anterior(self):
-        self.ok("ciclo", "ACT-001")
-        self.cerrar_hasta(2)
-        self.assertIn("3", self.falla("paso", "ACT-001", "5", "--hecho", "plan de pruebas"))
-
-    def test_seguridad_cierra_antes_que_el_probador(self):
-        self.ok("ciclo", "ACT-001")
-        self.cerrar_hasta(9)
-        self.ok("paso", "ACT-001", "11", "--hecho", "opus sobre abc123: sin hallazgos")
-        self.assertIn("10", self.falla("paso", "ACT-001", "12", "--hecho", "412 passed"))
-        self.ok("paso", "ACT-001", "10", "--hecho", "sonnet sobre abc123: 12 verdes, rojos sin el cambio")
-        self.ok("paso", "ACT-001", "12", "--hecho", "412 passed")
-
-    def test_fuera_de_un_par_el_orden_sigue_estricto(self):
-        self.ok("ciclo", "ACT-001")
-        self.cerrar_hasta(6)
-        self.assertIn("7", self.falla("paso", "ACT-001", "8", "--no-aplica", "sin UI"))
+        self.cerrar(4)
+        self.cerrar(6)
+        self.assertEqual([s["estado"] for s in self.ciclo()[3:6]], ["hecha", "hecha", "no_aplica"])
 
     # --- no aplica y omitido ---
     def test_no_aplica_cierra_sin_marcar_como_hecho(self):
@@ -168,7 +159,7 @@ class Tablero(unittest.TestCase):
         self.ok("paso", "ACT-001", "6", "--no-aplica", "es mejora, no bug")
         p = self.ciclo()[5]
         self.assertEqual((p["estado"], p["hecha"], p["nota"]), ("no_aplica", False, "es mejora, no bug"))
-        self.ok("paso", "ACT-001", "7", "--hecho", "commit abc123")  # cuenta como cerrado para el orden
+        self.cerrar(7)  # cuenta como cerrado para el orden
         self.assertIn("no aplica: es mejora, no bug", self.html())
 
     def test_no_aplica_sin_motivo_se_niega(self):
@@ -180,10 +171,10 @@ class Tablero(unittest.TestCase):
     def test_omitido_guarda_el_permiso(self):
         self.ok("ciclo", "ACT-001")
         self.cerrar_hasta(7)
-        self.ok("paso", "ACT-001", "8", "--omitido", "permiso del dueño: la pantalla la revisa él mañana")
+        self.ok("paso", "ACT-001", "8", "--omitido", "permiso del dueño, 2026-01-01: la pantalla la revisa él mañana")
         p = self.ciclo()[7]
         self.assertEqual((p["estado"], p["hecha"]), ("omitida", False))
-        self.ok("paso", "ACT-001", "9", "--hecho", "sin desvíos ni cambios de la crítica")
+        self.cerrar(9)
 
     # --- candado de Revisión de código ---
     def test_no_pasa_a_revision_con_pasos_abiertos(self):
@@ -199,6 +190,18 @@ class Tablero(unittest.TestCase):
         self.assertEqual(self.act()["columna"], "revision")
 
     # --- actividades que ya existían ---
+    def test_checklist_de_antes_de_la_090_se_pasa_a_ciclo_py(self):
+        self.ok("ciclo", "ACT-001")
+        self.cerrar_hasta(2)
+        import ciclo
+        os.remove(ciclo.ruta_viva(self.dir, "ACT-001"))  # como quedaba antes: solo en el tablero
+        self.assertIn("antes de la 0.9.0", self.falla("paso", "ACT-001", "3", "--hecho", "plan"))
+        self.ok("ciclo", "ACT-001")
+        c = ciclo.leer(self.dir, "ACT-001")
+        self.assertEqual([p["estado"] for p in c["pasos"][:3]], ["hecha", "hecha", "pendiente"])
+        self.cerrar(3)
+
+
     def test_actividad_sin_ciclo_se_mueve_y_se_pinta_como_antes(self):
         self.a_en_curso()
         self.ok("mover", "ACT-001", "revision")
