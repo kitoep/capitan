@@ -39,6 +39,11 @@
           },
           {
             "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py.sh\" hook_ciclo.py",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py.sh\" hook_cierre.py",
             "timeout": 180
           },
