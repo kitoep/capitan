@@ -48,6 +48,16 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/py.sh\" hook_tracker.py",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }

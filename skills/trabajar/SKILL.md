@@ -54,7 +54,7 @@ si un archivo no cabe, ordena leerlo completo y pide podarlo. Por eso
 **Actualizado:** AAAA-MM-DD HH:MM · sesión AAAA-MM-DD · rama de sesión <rama> · PR <url o «sin PR aún»>
 
 ## Dónde quedó
-<una línea por actividad tocada: clave · columna · rama · qué falta si quedó a medias>
+<una línea por actividad tocada: clave · columna · rama · HH:MM → HH:MM · uso 5 h +<x> · semana +<y> · qué falta si quedó a medias>
 
 ## Lo que sigue
 <la próxima actividad elegible y por qué esa; lo que está bloqueado y por qué>
@@ -221,7 +221,7 @@ dudas, empieza por la parte que deja un punto limpio temprano.
 | # | Paso | Cómo | Puerta: cuándo se puede marcar |
 |---|---|---|---|
 | 1 | **Rama propia** | nombre canónico (§El tracker) desde la rama principal | una actividad = una rama. **El PR es por SESIÓN**: la rama de actividad se sube SIN PR y al cerrarla se mergea con `--no-ff` a la rama de sesión (`{proyecto}-sesion-AAAA-MM-DD`, desde la principal al día); al detenerte, UN PR de la rama de sesión contra la principal. Nada de PRs apilados |
-| 2 | **Moverla a En curso y crear el checklist** | contigua; luego agrega el checklist del ciclo (§El checklist del ciclo) | la tarjeta en En curso, el checklist creado y el paso 1 marcado con el nombre de la rama |
+| 2 | **Moverla a En curso y crear el checklist** | contigua; luego agrega el checklist del ciclo (§El checklist del ciclo) | la tarjeta en En curso, el checklist creado y el paso 1 marcado con el nombre de la rama. La evidencia del 2 trae la **hora (`date +%H:%M`) y el uso de inicio** del medidor de la sesión, leídos en ese momento |
 | 3 | **Plan** | tú, con `senior-engineer-es:planeacion`: el plan COMPLETO (problema, archivos y capas, decisiones con alternativas, riesgos, orden, cómo sabrás que quedó) | sin plan escrito no hay código |
 | 4 | **Crítica** + **seguridad del plan** (en paralelo) | agente fresco **opus** con `senior-engineer-es:critico`: recibe TODO el contexto (la actividad completa · su épica y specs · reglas del repo · el código que toca · hallazgos relacionados) y el plan — NO tu defensa. Seguridad (`senior-engineer-es:seguridad`, opus) cuando toca auth, PII, secretos, consentimiento o algo externo | cada punto se corrige en el plan o se justifica por escrito, ANTES del código. Lo que la crítica obligue a cambiar del plan entra a la **lista de desvíos** (paso 9) |
 | 5 | **Plan de pruebas** | agente fresco **opus** con `senior-engineer-es:pruebas`: recibe SOLO los criterios textuales (y los defectos relacionados). **Ni tu plan ni tu código**: prueba lo que se pidió, no lo que tú pensaste. Adversariales primero, y qué debe fallar hoy | el plan de pruebas escrito, con sus adversariales y lo que debe fallar hoy. No arranca hasta cerrar el 4 |
@@ -231,11 +231,11 @@ dudas, empieza por la parte que deja un punto limpio temprano.
 | 9 | **Actualizar el plan de pruebas** (si la crítica cambió el plan o hubo desvíos) | agente fresco **opus** (`pruebas`): plan original + criterios + desvíos; sin ver el código | el plan de pruebas cubre cada desvío y cada cambio de la crítica; sin ninguno, «no aplica» |
 | 10 | **Ejecutar las pruebas** | agente fresco **sonnet** (`pruebas` + `verificador`): tests de código Y **recorridos E2E** en el entorno local (usuario de prueba del repo, nunca credenciales reales), con **captura de cada paso**, emergentes abiertos, claro/oscuro, dos anchos y consola. **El E2E local no se salta**: si el usuario de prueba no entra, arreglarlo ES parte de la actividad. Cada test **verde con el cambio y ROJO contra la principal**. PROHIBIDO cambiar un resultado esperado. Recibe el diff y señala lo raro | test que no se vio fallar sin el cambio no cuenta |
 | 11 | **Seguridad sobre el diff** | agente **opus** con `senior-engineer-es:seguridad`, en TODA actividad | cada hallazgo se cierra o se justifica por escrito |
-| 12 | **Verificador** | tú, con `senior-engineer-es:verificador`: CI-equivalente local + puerta visual con evidencia ejecutada | todo verde o no se sube |
+| 12 | **Verificador** | tú, con `senior-engineer-es:verificador`: CI-equivalente local (`{CAPITAN}/scripts/ci_local.py`) + puerta visual con evidencia ejecutada | todo verde o no se sube. La evidencia es el **conteo literal de la salida** («412 passed, 0 failed») y que `ci_local.py` registró ese commit (`.git/capitan/ci-registro.log`); nunca un «todo verde» de memoria. Si una parte de la suite no aparece en la salida, no corrió |
 | 13 | **Entregar** | `senior-engineer-es:entrega-git`: commits citando `{PROYECTO}/ACT-0xx`, push de LA RAMA, merge `--no-ff` a la rama de sesión (`Merge {PROYECTO}/ACT-0xx …`) | nunca la principal, nunca merge a la principal, nunca squash |
 | 14 | Hallazgos | al registro de defectos con su clave y, si hay trabajo, actividad nueva | cada uno con **qué pasa, dónde (archivo:línea), evidencia, el test que lo reproduciría y la SOLUCIÓN RECOMENDADA COMPLETA** (§La solución recomendada) |
 | 15 | **Relevo y notas** | reescribe `docs/capitan/estado.md`; las decisiones del dueño, a `decisiones.md` en el momento; y anota para el reporte (en `{scratchpad}/sesion.json`): horas y uso de inicio y cierre, agentes, hallazgos, trabajo nuevo y dónde se acomodó, lo no probado, resultados y capturas, qué ver, pendientes del dueño | `estado.md` al día ANTES de documentar en el tracker y de tomar la siguiente (anota la columna en la que la deja el paso 16) |
-| 16 | **Documentar en el tracker** | revisa el checklist completo; comentario de cierre (plantilla abajo); marca este paso, el último, y la tarjeta pasa a **Revisión de código** (o a la columna que la config diga, §El checklist del ciclo) | pasos 1–15 cerrados y el comentario de cierre publicado. Siempre es lo último |
+| 16 | **Documentar en el tracker** | revisa el checklist completo; comentario de cierre (plantilla abajo); marca este paso, el último, y la tarjeta pasa a **Revisión de código** (o a la columna que la config diga, §El checklist del ciclo) | pasos 1–15 cerrados y el comentario de cierre publicado. La evidencia del 16 trae la **hora y el uso de cierre**. Siempre es lo último |
 
 **Actividad chica** (solo textos o estilos): cierra la crítica (4) como «no
 aplica: actividad chica (solo textos o estilos)». Nunca se saltan el plan de
@@ -368,6 +368,12 @@ y el dueño se queda sin poder trabajar.
 - `hook_git_agentes.py` **bloquea a cualquier subagente** los git que cambian
   estado (Claude Code marca sus comandos con `agent_id`; la sesión principal sí
   hace commits y merges).
+- `hook_tracker.py` **bloquea pasar una tarjeta a Revisión de código** en un
+  tracker MCP (la herramienta «Mover» y el valor de «Revisión de código» de
+  `## Tracker`) si `docs/capitan/estado.md` no se reescribió después del merge
+  de la actividad, o si su línea no trae `HH:MM → HH:MM` y el uso gastado. Es
+  el candado del checklist cuando no hay tablero local. Si no puede leer la
+  config o no encuentra el merge, avisa y no bloquea.
 - `hook_push.py` **bloquea `git push` de una rama con PR abierto** si el CI
   local no pasó sobre ese mismo commit. Con PR abierto cada push corre el CI
   completo de GitHub y se cobra en minutos de Actions. Se corre
