@@ -223,14 +223,14 @@ dudas, empieza por la parte que deja un punto limpio temprano.
 | 1 | **Rama propia** | nombre canónico (§El tracker) desde la rama principal | una actividad = una rama. **El PR es por SESIÓN**: la rama de actividad se sube SIN PR y al cerrarla se mergea con `--no-ff` a la rama de sesión (`{proyecto}-sesion-AAAA-MM-DD`, desde la principal al día); al detenerte, UN PR de la rama de sesión contra la principal. Nada de PRs apilados |
 | 2 | **Moverla a En curso y crear el checklist** | contigua; luego agrega el checklist del ciclo (§El checklist del ciclo) | la tarjeta en En curso, el checklist creado y el paso 1 marcado con el nombre de la rama. La evidencia del 2 trae la **hora (`date +%H:%M`) y el uso de inicio** del medidor de la sesión, leídos en ese momento |
 | 3 | **Plan** | tú, con `senior-engineer-es:planeacion`: el plan COMPLETO (problema, archivos y capas, decisiones con alternativas, riesgos, orden, cómo sabrás que quedó) | sin plan escrito no hay código |
-| 4 | **Crítica** + **seguridad del plan** (en paralelo) | agente fresco **opus** con `senior-engineer-es:critico`: recibe TODO el contexto (la actividad completa · su épica y specs · reglas del repo · el código que toca · hallazgos relacionados) y el plan — NO tu defensa. Seguridad (`senior-engineer-es:seguridad`, opus) cuando toca auth, PII, secretos, consentimiento o algo externo | cada punto se corrige en el plan o se justifica por escrito, ANTES del código. Lo que la crítica obligue a cambiar del plan entra a la **lista de desvíos** (paso 9) |
-| 5 | **Plan de pruebas** | agente fresco **opus** con `senior-engineer-es:pruebas`: recibe SOLO los criterios textuales (y los defectos relacionados). **Ni tu plan ni tu código**: prueba lo que se pidió, no lo que tú pensaste. Adversariales primero, y qué debe fallar hoy | el plan de pruebas escrito, con sus adversariales y lo que debe fallar hoy. No arranca hasta cerrar el 4 |
+| 4 | **Crítica** + **seguridad del plan** (en paralelo) | agente fresco **opus** con `senior-engineer-es:critico`: recibe TODO el contexto (la actividad completa · su épica y specs · reglas del repo · el código que toca · hallazgos relacionados) y el plan — NO tu defensa. Seguridad (`senior-engineer-es:seguridad`, opus) cuando toca auth, PII, secretos, consentimiento o algo externo | cada punto se corrige en el plan o se justifica por escrito, ANTES del código. Lo que la crítica obligue a cambiar del plan, del alcance o de los criterios entra a la **lista de desvíos** (paso 9). Corre a la vez que el 5 |
+| 5 | **Plan de pruebas** | agente fresco **opus** con `senior-engineer-es:pruebas`: recibe SOLO los criterios textuales (y los defectos relacionados). **Ni tu plan ni tu código**: prueba lo que se pidió, no lo que tú pensaste. Adversariales primero, y qué debe fallar hoy | el plan de pruebas escrito, con sus adversariales y lo que debe fallar hoy. **Corre en paralelo con el 4** (los dos agentes se lanzan en el mismo mensaje: el 5 no necesita el plan) y puede cerrarse antes que el 4 o junto con él. Si la crítica cambia alcance o criterios, el 9 lo lleva al plan de pruebas |
 | 6 | **Si es bug: reproducir** | `senior-engineer-es:reparador`: test que FALLA hoy, salida pegada | sin reproducción no hay arreglo |
 | 7 | **Implementar** | tú, con las convenciones del repo. Lleva una **lista de desvíos** respecto al plan, con su porqué (incluye lo que cambió la crítica) | reglas del repo intactas |
 | 8 | **UI** | design system y puerta visual que nombre la config | medida en el navegador, no leída en el código; emergentes ABIERTOS; foco y accesibilidad medidos |
 | 9 | **Actualizar el plan de pruebas** (si la crítica cambió el plan o hubo desvíos) | agente fresco **opus** (`pruebas`): plan original + criterios + desvíos; sin ver el código | el plan de pruebas cubre cada desvío y cada cambio de la crítica; sin ninguno, «no aplica» |
-| 10 | **Ejecutar las pruebas** | agente fresco **sonnet** (`pruebas` + `verificador`): tests de código Y **recorridos E2E** en el entorno local (usuario de prueba del repo, nunca credenciales reales), con **captura de cada paso**, emergentes abiertos, claro/oscuro, dos anchos y consola. **El E2E local no se salta**: si el usuario de prueba no entra, arreglarlo ES parte de la actividad. Cada test **verde con el cambio y ROJO contra la principal**. PROHIBIDO cambiar un resultado esperado. Recibe el diff y señala lo raro | test que no se vio fallar sin el cambio no cuenta |
-| 11 | **Seguridad sobre el diff** | agente **opus** con `senior-engineer-es:seguridad`, en TODA actividad | cada hallazgo se cierra o se justifica por escrito |
+| 10 | **Ejecutar las pruebas** | agente fresco **sonnet** (`pruebas` + `verificador`): tests de código Y **recorridos E2E** en el entorno local (usuario de prueba del repo, nunca credenciales reales), con **captura de cada paso**, emergentes abiertos, claro/oscuro, dos anchos y consola. **El E2E local no se salta**: si el usuario de prueba no entra, arreglarlo ES parte de la actividad. Cada test **verde con el cambio y ROJO contra la principal**. PROHIBIDO cambiar un resultado esperado. Recibe el diff y señala lo raro. **Corre en paralelo con el 11, sobre el mismo commit** | test que no se vio fallar sin el cambio no cuenta. Si la seguridad (11) provocó un arreglo, corre sus casos sobre ese arreglo antes de cerrar. La evidencia dice qué commit probó |
+| 11 | **Seguridad sobre el diff** | agente **opus** con `senior-engineer-es:seguridad`, en TODA actividad. **Corre en paralelo con el 10, sobre el mismo commit** | cada hallazgo se cierra o se justifica por escrito. Si el probador (10) provocó un arreglo, revisa SOLO el diff de ese arreglo antes de cerrar. La evidencia dice qué commit revisó |
 | 12 | **Verificador** | tú, con `senior-engineer-es:verificador`: CI-equivalente local (`{CAPITAN}/scripts/ci_local.py`) + puerta visual con evidencia ejecutada | todo verde o no se sube. La evidencia es el **conteo literal de la salida** («412 passed, 0 failed») y que `ci_local.py` registró ese commit (`.git/capitan/ci-registro.log`); nunca un «todo verde» de memoria. Si una parte de la suite no aparece en la salida, no corrió |
 | 13 | **Entregar** | `senior-engineer-es:entrega-git`: commits citando `{PROYECTO}/ACT-0xx`, push de LA RAMA, merge `--no-ff` a la rama de sesión (`Merge {PROYECTO}/ACT-0xx …`) | nunca la principal, nunca merge a la principal, nunca squash |
 | 14 | Hallazgos | al registro de defectos con su clave y, si hay trabajo, actividad nueva | cada uno con **qué pasa, dónde (archivo:línea), evidencia, el test que lo reproduciría y la SOLUCIÓN RECOMENDADA COMPLETA** (§La solución recomendada) |
@@ -275,7 +275,19 @@ qué evidencia se cerró cada uno, mientras la actividad corre y no solo al fina
 
 1. **Orden.** No empiezas un paso sin haber cerrado el anterior: hecho con su
    evidencia, «no aplica» con su motivo u omitido con el permiso del dueño.
-   Nada queda abierto «para después». El 5 no arranca hasta cerrar el 4.
+   Nada queda abierto «para después». La única excepción son los revisores
+   que no dependen uno del otro, que corren a la vez:
+
+   **En paralelo:** 4 y 5 · 10 y 11.
+
+   Los dos de un par arrancan juntos (sus agentes se lanzan en el mismo
+   mensaje), cualquiera de los dos puede cerrarse primero, y el paso que
+   sigue al par no empieza hasta cerrar los dos. **Si uno provoca un cambio,
+   el otro revisa ese cambio antes de cerrar su paso**: la crítica que cambia
+   alcance o criterios llega al plan de pruebas por el paso 9; un arreglo que
+   pide el probador lo revisa seguridad (solo ese diff), y uno que pide
+   seguridad lo prueba el probador. La evidencia del 10 y del 11 dice qué
+   commit revisó cada uno.
 2. **La puerta es la condición para marcar.** La columna «Puerta» dice cuándo
    un paso puede marcarse. Si la puerta no se cumple, el paso no se marca y no
    avanzas: lo arreglas, o te detienes y avisas.
